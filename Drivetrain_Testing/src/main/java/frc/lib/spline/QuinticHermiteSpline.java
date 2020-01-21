@@ -218,7 +218,7 @@ public class QuinticHermiteSpline extends Spline {
 
         for (int i = 0; i < _splines.size() - 1; ++i) {
             // Don't try to optimize colinear points
-            if (_splines.get(i).getStartPose().isColinear(_splines.get(i+  1).getStartPose()) || _splines.get(i).getEndPose().isColinear(_splines.get(i).getEndPose())) {
+            if (_splines.get(i).getStartPose().isColinear(_splines.get(i + 1).getStartPose()) || _splines.get(i).getEndPose().isColinear(_splines.get(i).getEndPose())) {
                 continue;
             }
             double original = sumDCurvature2(_splines);
