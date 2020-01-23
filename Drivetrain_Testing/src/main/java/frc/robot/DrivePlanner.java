@@ -1,10 +1,12 @@
 package frc.robot;
 
+import frc.lib.utils.Units;
 import frc.lib.utils.geometry.*;
 import frc.lib.trajectory.*;
 import frc.lib.trajectory.timing.*;
 
 import java.util.List;
+
 import java.util.ArrayList;
 
 /**
@@ -23,8 +25,22 @@ public class DrivePlanner {
     private static final double kMaxDy = .25;
     private static final double kMaxDTheta = Math.toRadians(5.0);
 
+    private TrajectoryIterator<TimedState<Pose2dWithCurvature>> currentTrajectory;
+    private boolean isReversed = false;
+    private double lastTime = Double.POSITIVE_INFINITY;
+    public TimedState<Pose2dWithCurvature> setpoint = new TimedState<>(Pose2dWithCurvature.identity());
+    private Pose2d error = Pose2d.identity();
+    private Command command = new Command();
+
+    private double dt = 0.0;
+
+
     private DrivePlanner() {
 
+    }
+
+    public void setTrajectory(final TrajectoryIterator<TimedState<Pose2dWithCurvature>> _trajectory) {
+        currentTrajectory = _trajectory;
     }
 
     /**
@@ -75,7 +91,7 @@ public class DrivePlanner {
             double _endVelocity,
             double _maxVelocity, // inches/s^2
             double _maxAcceleration, // inches/s^2
-            double _maxVoltage){
+            double _maxVoltage) {
         List<Pose2d> waypointsMaybeFlipped = _waypoints;
         //TODO: Make sure the flip constant is consistent with the way we define our cordinate system
         final Pose2d flip = Pose2d.fromRotation(new Rotation2d(0, -1, false));
@@ -109,5 +125,73 @@ public class DrivePlanner {
         Trajectory<TimedState<Pose2dWithCurvature>> timedTrajectory = TimingUtil.timeParameterizeTrajectory(_reversed, new DistanceView<>(trajectory), kMaxDx, allConstraints,
                 _startVelocity, _endVelocity, _maxVelocity, _maxAcceleration);
         return timedTrajectory;
+    }
+
+    public Command followTrajectory(double _timeStamp, Pose2d _currentPose) {
+        if (currentTrajectory == null) return new Command();
+
+        if (currentTrajectory.getProgress() == 0.0 && !Double.isFinite(lastTime)) lastTime = _timeStamp;
+
+        dt = _timeStamp - lastTime;
+
+        if (!currentTrajectory.isDone()) {
+            //Generate Feedfoward voltages
+            final double velocity_m = Units.inchesToMeters(setpoint.velocity());
+            final double acceleration_m = Units.inchesToMeters(setpoint.acceleration());
+            final double curvature = Units.metersToInches(setpoint().state().getCurvature());
+            final double dcurvatureDs = Units.metersToInches(Units.metersToInches(setpoint.state().getDCurvatureDs()));
+        }
+        return new Command();
+    }
+
+    public boolean isDone() {
+        return currentTrajectory != null && currentTrajectory.isDone();
+    }
+
+    public Pose2d error() {
+        return error;
+    }
+
+    public TimedState<Pose2dWithCurvature> setpoint() {
+        return setpoint;
+    }
+
+    public static class Command {
+        public Command() {
+
+        }
+
+        public Command(double _leftVelocity, double _rightVelocity, double _leftAcceleration, double _rightAcceleration, double _leftFeedfowardVoltage, double _rightFeedfowardVoltage) {
+            this.leftVelocity = _leftVelocity;
+            this.leftAcceleration = _leftAcceleration;
+            this.leftFeedfowardVoltage = _leftFeedfowardVoltage;
+
+            this.rightVelocity = _rightVelocity;
+            this.rightAcceleration = _rightAcceleration;
+            this.rightFeedfowardVoltage = _rightFeedfowardVoltage;
+        }
+
+        public double leftVelocity;
+        public double rightVelocity;
+        
+        public double leftAcceleration;
+        public double rightAcceleration;
+
+        public double leftFeedfowardVoltage;
+        public double rightFeedfowardVoltage;
+
+        public void flip() {
+            double tempLeftVelocity = leftVelocity;
+            leftVelocity = -rightVelocity;
+            rightVelocity = -tempLeftVelocity;
+
+            double tempLeftAcceleration = leftAcceleration;
+            leftAcceleration = -rightAcceleration;
+            rightAcceleration = -tempLeftAcceleration;
+
+            double tempLeftFeedfowardVoltage = leftFeedfowardVoltage;
+            leftFeedfowardVoltage = -rightFeedfowardVoltage;
+            rightFeedfowardVoltage = -tempLeftFeedfowardVoltage;
+        } 
     }
 }
