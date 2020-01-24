@@ -7,9 +7,13 @@
 
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+//import jdk.internal.util.xml.impl.Input;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -66,7 +70,51 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     mInputManager.update(0);
 
-    mRobotMap.drive.arcadeDrive(mInputManager.driverLeftY, mInputManager.driverRightX);
+    //Driver Controls
+    mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);
+
+    if (mInputManager.driverPOV == 0) {
+      System.out.println("Climber Extend");
+    } else if (mInputManager.driverPOV == 90) {
+      System.out.println("Climber Right");
+    } else if (mInputManager.driverPOV == 180) {
+      System.out.println("Climber Retract");
+    } else if (mInputManager.driverPOV == 270) {
+      System.out.println("Climber Left");
+    }
+
+    //Operator Controls
+
+    if (mInputManager.opLeftStickX > .5) {
+      System.out.println("Wheel Spin Right");
+    } else if (mInputManager.opLeftStickX < -.5) {
+      System.out.println("Wheel Spin Left");
+    }
+
+    if (mInputManager.opPOV == 0) {
+      System.out.println("Hood Up");
+    } else if (mInputManager.opPOV == 90) {
+      System.out.println("Shooter Turn Right");
+    } else if (mInputManager.opPOV == 180) {
+      System.out.println("Hood Down");
+    } else if (mInputManager.opPOV == 270) {
+      System.out.println("Shooter Turn Left");
+    }
+
+    if (mInputManager.opA && !mInputManager.opB) {
+      System.out.println("Intake Balls");
+    } else if (!mInputManager.opA && mInputManager.opB) {
+      System.out.println("Rev. Intake Balls");
+    }
+
+    if (mInputManager.opX) {
+      System.out.println("Flywheel");
+    }
+    if (mInputManager.opY) {
+      System.out.println("Advance Indexer");
+    }
+
+    
   }
 
   @Override

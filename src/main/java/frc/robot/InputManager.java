@@ -8,7 +8,6 @@ import frc.robot.Updateable;
 
 //import frc.lib.utils.Utilities;
 
-import java.util.HashMap;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 
@@ -19,16 +18,30 @@ public class InputManager implements Updateable {
     private XboxController mController0 = new XboxController(0);
     private XboxController mController1 = new XboxController(1);
 
-    //private double kDeadband = 0.05;
+    //driver buttons 
 
-    //All these are values that can be read from outside the class
-    // public HashMap<String, Boolean> driverButtons  = new HashMap<String, Boolean>();
-    // public HashMap<String, Double> driverJoysticks  = new HashMap<String, Double>();
+    public double driverLeftStickY = 0;
+    public double driverLeftStickX = 0;
+    public double driverRightStickY = 0;
+    public double driverRightStickX = 0;
 
-    public double driverLeftY = 0;
-    public double driverLeftX = 0;
-    public double driverRightY = 0;
-    public double driverRightX = 0;
+    public static boolean driverA = false;
+    public static boolean driverB = false;
+    public static boolean driverX = false;
+    public static boolean driverY = false;
+
+    public int driverPOV = -1;
+
+    //operator buttons
+
+    public double opLeftStickX = 0;
+
+    public boolean opA = false;
+    public boolean opB = false;
+    public boolean opX = false;
+    public boolean opY = false;
+
+    public int opPOV = -1;
 
     public static InputManager getInstance() {
         if (kInstance == null) {
@@ -42,10 +55,26 @@ public class InputManager implements Updateable {
     }
 
     public void update(double dt) {
-        driverLeftY = mController0.getY(Hand.kLeft);
-        driverLeftX = mController0.getX(Hand.kLeft);
-        driverRightY = mController0.getY(Hand.kRight);
-        driverRightX = mController0.getX(Hand.kRight);
+        driverLeftStickY = mController0.getY(Hand.kLeft);
+        driverLeftStickX = mController0.getX(Hand.kLeft);
+        driverRightStickY = mController0.getY(Hand.kRight);
+        driverRightStickX = mController0.getX(Hand.kRight);
+
+        driverA = mController0.getAButton();
+        driverB = mController0.getBButton();
+        driverX = mController0.getXButton();
+        driverY = mController0.getYButton();
+        
+        driverPOV = mController0.getPOV();
+
+        opLeftStickX = mController1.getX(Hand.kLeft);
+
+        opA = mController1.getAButton();
+        opB = mController1.getBButton();
+        opX = mController1.getXButton();
+        opY = mController1.getYButton();
+
+        opPOV = mController1.getPOV();
     }
 
 }
