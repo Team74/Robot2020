@@ -41,6 +41,12 @@ public class InputManager implements Updateable {
     public boolean opX = false;
     public boolean opY = false;
 
+    public boolean opLeftBumper = false;
+    public boolean opRightBumper = false;
+
+    public double opRightTrigger = 0;
+    public double opLeftTrigger = 0;
+
     public int opPOV = -1;
 
     public static InputManager getInstance() {
@@ -73,6 +79,12 @@ public class InputManager implements Updateable {
         opB = mController1.getBButton();
         opX = mController1.getXButton();
         opY = mController1.getYButton();
+
+        opLeftBumper = mController1.getBumper(Hand.kLeft);
+        opRightBumper = mController1.getBumper(Hand.kRight);
+
+        opRightTrigger = mController1.getTriggerAxis(Hand.kRight);
+        opLeftTrigger = mController1.getTriggerAxis(Hand.kLeft);
 
         opPOV = mController1.getPOV();
     }

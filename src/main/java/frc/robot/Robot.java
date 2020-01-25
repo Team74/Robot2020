@@ -8,6 +8,7 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -30,6 +31,7 @@ public class Robot extends TimedRobot {
 
   RobotMap mRobotMap;
   InputManager mInputManager;
+  Shooter shooter;
 
   @Override
   public void robotInit() {
@@ -39,6 +41,7 @@ public class Robot extends TimedRobot {
 
     mRobotMap = RobotMap.getInstance();
     mInputManager = InputManager.getInstance();
+    shooter = new Shooter(mRobotMap, mInputManager);
   }
 
   @Override
@@ -48,7 +51,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
+    //m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -66,13 +69,21 @@ public class Robot extends TimedRobot {
   }
 
 
+  private int LThold = 0;
+  private int Lhold = 0;
+  private boolean wheelDeploy = false;
+
+
   @Override
   public void teleopPeriodic() {
     mInputManager.update(0);
+    shooter.handleInput();
+    shooter.update(); 
+   
 
     //Driver Controls
-    mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);
-
+    //mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);
+/*
     if (mInputManager.driverPOV == 0) {
       System.out.println("Climber Extend");
     } else if (mInputManager.driverPOV == 90) {
@@ -107,14 +118,42 @@ public class Robot extends TimedRobot {
       System.out.println("Rev. Intake Balls");
     }
 
-    if (mInputManager.opX) {
-      System.out.println("Flywheel");
-    }
+    
     if (mInputManager.opY) {
       System.out.println("Advance Indexer");
     }
 
-    
+    int holdTime = 16;
+    double triggerIsPressed = .85;
+    if (mInputManager.opRightTrigger > triggerIsPressed) {
+      LThold++;
+      if (LThold > holdTime) {
+        System.out.println("Fire all Balls");
+      }
+    } else {
+      if (LThold > 0 && LThold < holdTime) {
+        System.out.println("Fire one Ball");
+      }
+      LThold = 0;
+    }
+
+    if (mInputManager.opLeftTrigger > triggerIsPressed) {
+      System.out.println("Auto Aim");
+    }
+
+    if (mInputManager.opLeftBumper) {
+      if (wheelDeploy && Lhold == 0) {
+        System.out.println("Retract Wheel");
+        wheelDeploy = false;
+      } else if (Lhold == 0) {
+        System.out.println("Deploy Wheel");
+        wheelDeploy = true;
+      }
+      Lhold++;
+    } else {
+      Lhold = 0;
+    }
+    */
   }
 
   @Override
