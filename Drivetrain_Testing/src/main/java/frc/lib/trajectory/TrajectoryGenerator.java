@@ -101,19 +101,30 @@ public class TrajectoryGenerator {
     x and y are defined in inches
     */
 
-    //TODO: adjust these so positions are correct and rework how some of the crossline points are calculated.
-    public static final Pose2d kOrigin = new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0));
+    //TODO: adjust these so positions are correct
+    public static final Pose2d kOrigin = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
     public static final Pose2d kTestPathEnd = new Pose2d(new Translation2d(50.0, 0.0), Rotation2d.fromDegrees(0.0));
 
-    public static final Pose2d kLeftStart = new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0));
-    public static final Pose2d kCenterStart = new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0));
+    //TODO: adjust these so positions are correct
+    //NOTE: These should be able to be rotated 180 degrees to get the ones on the other side of the field.
+    //Locations of the 3 in line balls in tench defined as first ball nearest to the driver station
+    public static final Pose2d kFirstTrenchBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    public static final Pose2d kSecondTrenchBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    public static final Pose2d kThirdTrenchBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    //Location to pick up side by side ball on opposite side of the trench
+    public static final Pose2d k45TrenchBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
 
-    public static final Pose2d kLeftHighStart = new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0));
+    //TODO: adjust these so positions are correct
+    //NOTE: These should be able to be rotated 180 degrees to get ones on other side of the field.
+    //Locations of the 5 balls in the rendezvous defined as first ball nearest to the trench
+    public static final Pose2d kFirstRendezvousBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    public static final Pose2d kSecondRendezvousBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    public static final Pose2d kThirdRendezvousBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    public static final Pose2d kFourthRendezvousBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
+    public static final Pose2d kFifthRendezvousBall = new Pose2d(new Translation2d(), Rotation2d.fromDegrees(0.0));
 
-    public static final Pose2d kCrossLine = new Pose2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0));
+    //TODO: Define shooting positions
 
-    public static final Pose2d kLeftCrossLine = kLeftStart.transformBy(kCrossLine);
-    public static final Pose2d kCenterCrossLine = kCenterStart.transformBy(kCrossLine);
 
     public class Trajectories {
 
@@ -133,48 +144,18 @@ public class TrajectoryGenerator {
         }
 
         public final Trajectory<TimedState<Pose2dWithCurvature>> testPath;
-
-        public final MirroredTrajectory dismount;
-
-        public final MirroredTrajectory sideCrossLine;
-        public final MirroredTrajectory centerCrossLine;
+        public final MirroredTrajectory mirroredTestPath;
 
         private Trajectories() {
             testPath = getTestPath();
-            dismount = new MirroredTrajectory(getDismount());
-            sideCrossLine = new MirroredTrajectory(getSideCrossLine());
-            centerCrossLine = new MirroredTrajectory(getCenterCrossLine());
+            mirroredTestPath = new MirroredTrajectory(getTestPath());
 
         }
 
-        //TODO: kMaxDeceleration can be changed for differant paths
-        //      kDefaultVelocity can be changed for differant paths
-        //      kSlowdownChunks can be changed for differant paths
         private Trajectory<TimedState<Pose2dWithCurvature>> getTestPath() {
             List<Pose2d> waypoints = new ArrayList<>();
             waypoints.add(kOrigin);
             waypoints.add(kTestPathEnd);
-            return generateTrajectory(false, waypoints, Arrays.asList(), kMaxVelocity, kMaxAcceleration, kMaxVoltage);
-        }
-
-        private Trajectory<TimedState<Pose2dWithCurvature>> getSideCrossLine() {
-            List<Pose2d> waypoints = new ArrayList<>();
-            waypoints.add(kLeftStart);
-            waypoints.add(kLeftCrossLine);
-            return generateTrajectory(false, waypoints, Arrays.asList(), kMaxVelocity, kMaxAcceleration, kMaxVoltage);
-        }
-
-        private Trajectory<TimedState<Pose2dWithCurvature>> getCenterCrossLine() {
-            List<Pose2d> waypoints = new ArrayList<>();
-            waypoints.add(kCenterStart);
-            waypoints.add(kCenterCrossLine);
-            return generateTrajectory(false, waypoints, Arrays.asList(), kMaxVelocity, kMaxAcceleration, kMaxVoltage);
-        }
-
-        private Trajectory<TimedState<Pose2dWithCurvature>> getDismount() {
-            List<Pose2d> waypoints = new ArrayList<>();
-            waypoints.add(kLeftHighStart);
-            waypoints.add(kLeftStart);
             return generateTrajectory(false, waypoints, Arrays.asList(), kMaxVelocity, kMaxAcceleration, kMaxVoltage);
         }
     }
