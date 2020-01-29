@@ -15,6 +15,7 @@ public class Shooter {
     private BaseMotorController uptake;
 
     private DigitalInput limitSwitch;
+    private DigitalInput limitSwitch2;
 
     private InputManager inputManager;
 
@@ -25,7 +26,7 @@ public class Shooter {
     private boolean isAdvancing = false;
     private int shootState = 0;
 
-    private int shootProgress = 0;
+    private int shootProgress = 1;
     private int runUptake = 10;
 
     private int flywheelHold = 0;
@@ -39,6 +40,7 @@ public class Shooter {
         this.hood = robotMap.hood;
         this.intake = robotMap.intake;
         this.limitSwitch = robotMap.LimitSwitch;
+        this.limitSwitch2 = robotMap.LimitSwitch2;
         this.indexer = robotMap.indexer;
         this.uptake = robotMap.uptake;
         this.inputManager = inputManager;
@@ -90,27 +92,36 @@ public class Shooter {
         if (inputManager.opY && indexerHold == 0) {
             isAdvancing = true;
             indexerHold++;
-        } else if (!inputManager.opY) {
+        } else if (!inputManager.opY && shootState == 0) {
             isAdvancing = false;
             indexerHold = 0;
         }
+
         //shooter
         int holdTime = 16;
         double triggerIsPressed = .85;
         if (inputManager.opRightTrigger > triggerIsPressed) {
           shootHold++;
+          shootState = 0;
           if (shootHold > holdTime) {
             System.out.println("Fire all Balls");
+            shootState = 2;
           }
         } else {
           if (shootHold > 0 && shootHold < holdTime) {
             System.out.println("Fire one Ball");
+            shootState = 1;
+          } else if (shootHold > 0 && shootHold > holdTime) {
+            System.out.println("Stopping Multifire");
+            shootState = 0;
           }
           shootHold = 0;
         }
     }
 
     public void update() {
+        System.out.println("shoot State " + shootState);
+        System.out.println("shoot progress " + shootProgress);
         if (flywheelOn) {
            flywheel.set(ControlMode.PercentOutput, 10);
         } else {
@@ -164,6 +175,7 @@ public class Shooter {
         }
 
         if (shootState > 0) {
+            startShooting();
             if (shootProgress == 1) {
                 if (hasPrepedBall()) {
                     shootProgress++;
@@ -198,7 +210,7 @@ public class Shooter {
     }
 
     private boolean hasPrepedBall() {
-        return limitSwitch.get();
+        return !limitSwitch2.get();
     }
 
     private void alignShooter() {
