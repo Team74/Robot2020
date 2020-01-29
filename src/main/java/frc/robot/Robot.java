@@ -43,7 +43,7 @@ public class Robot extends TimedRobot {
     mRobotMap = RobotMap.getInstance();
     mInputManager = InputManager.getInstance();
     mVision = Vision.getInstance();
-    shooter = new Shooter(mRobotMap, mInputManager);
+    shooter = new Shooter(mRobotMap, mInputManager, mVision);
   }
 
   @Override

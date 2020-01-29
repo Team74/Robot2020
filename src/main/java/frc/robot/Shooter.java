@@ -18,6 +18,7 @@ public class Shooter {
     private DigitalInput limitSwitch2;
 
     private InputManager inputManager;
+    private 
 
     private Boolean flywheelOn = false;
     private int intakeState = 0;
@@ -34,7 +35,9 @@ public class Shooter {
     private int indexerHold = 0;
     private int shootHold = 0;
 
-    public Shooter(RobotMap robotMap, InputManager inputManager) {
+    private TurretState autoTurretState = TurretState.Holding;
+
+    public Shooter(RobotMap robotMap, InputManager inputManager, Vision vision) {
         this.flywheel = robotMap.flywheel;
         this.turret = robotMap.turret;
         this.hood = robotMap.hood;
@@ -214,7 +217,26 @@ public class Shooter {
     }
 
     private void alignShooter() {
+        autoTurretState = TurretState.Tracking;
+        if ()
+        //If no target in screen
+            //Turn to left limit
+            //Check for target in screen periodically
+                //If no target found turn to right
+                //Check for target in screen periodically
+        //If a target is in view
+            //calculate where we need to go
+            //Go there
+        //Once locked onto target, set state to holding and signal that we are prepared to shoot
+        //Possible use angelo backups
         turret.set(ControlMode.PercentOutput, 0);
         System.out.println("align  shooter");
+    }
+
+    public enum TurretState {
+        Tracking,
+        Holding,
+        ReadyToShoot,
+        Manual;
     }
 }

@@ -8,10 +8,10 @@ public class Client implements Runnable {
     private DataInputStream response = null;
     private DataOutputStream request = null;
 
-    private boolean running = false;
+    private volatile boolean running = false;
 
-    private String inputLine = "";
-    private String outputLine = "";
+    private volatile String inputLine = "";
+    private volatile String outputLine = "";
 
     public Client(String _adress, int _port) {
         try {
@@ -51,21 +51,11 @@ public class Client implements Runnable {
         }
     }
 
-    public void stop() {
-        if (running) {
-            running = !running;
-        }
-    }
-
-    public void setRequest(String _request) {
-        inputLine = _request;
-    }
-
-    public String getCurrentRequest() {
-        return inputLine;
+    public String setInput(String _input) {
+        return (inputLine = _input);
     }
 
     public String getData() {
-        return "";
+        return outputLine;
     }
 }
