@@ -31,8 +31,13 @@ public class Robot extends TimedRobot {
 
   RobotMap mRobotMap;
   InputManager mInputManager;
+<<<<<<< HEAD
   Climber climber;
   // Shooter shooter;
+=======
+  Shooter shooter;
+  Vision mVision;
+>>>>>>> c1a1cc7822d2a39cd7abb5f93f1085c5ecdea370
 
   @Override
   public void robotInit() {
@@ -42,8 +47,13 @@ public class Robot extends TimedRobot {
 
     mRobotMap = RobotMap.getInstance();
     mInputManager = InputManager.getInstance();
+<<<<<<< HEAD
     climber = new Climber(mInputManager, mRobotMap);
     // shooter = new Shooter(mRobotMap, mInputManager);
+=======
+    mVision = Vision.getInstance();
+    shooter = new Shooter(mRobotMap, mInputManager);
+>>>>>>> c1a1cc7822d2a39cd7abb5f93f1085c5ecdea370
   }
 
   @Override
