@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
 public class Climber {
@@ -36,25 +37,25 @@ public class Climber {
     public void update() {
         switch(climberState) {
             case 1:
-            System.out.println("Retract");
+                climbMotor.set(ControlMode.PercentOutput, -50);
                 break;
             case -1:
-                System.out.println("Extend");
+                climbMotor.set(ControlMode.PercentOutput, 50);
                 break;
             case 0:
-                System.out.println("Set to 0");
+               climbMotor.set(ControlMode.PercentOutput, 0);
                 break;
         }
 
         switch(balenceState) {
             case 1:
-                System.out.println("Left");
+                balenceMotor.set(ControlMode.PercentOutput, 50);
                 break;
             case -1:
-            System.out.println("Right");
+                balenceMotor.set(ControlMode.PercentOutput, -50);
                 break;
             case 0:
-            System.out.println("Set to 0");
+                balenceMotor.set(ControlMode.PercentOutput, 0);
         }
     }
 }

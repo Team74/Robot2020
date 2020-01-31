@@ -32,8 +32,8 @@ public class Robot extends TimedRobot {
   RobotMap mRobotMap;
   InputManager mInputManager;
   Climber climber;
-  // Shooter shooter;
-  //Vision mVision;
+  Shooter shooter;
+  Vision mVision;
 
   @Override
   public void robotInit() {
@@ -43,10 +43,10 @@ public class Robot extends TimedRobot {
 
     mRobotMap = RobotMap.getInstance();
     mInputManager = InputManager.getInstance();
+
     climber = new Climber(mInputManager, mRobotMap);
+    mVision = Vision.getInstance();
     // shooter = new Shooter(mRobotMap, mInputManager);
-    //mVision = Vision.getInstance();
-    //shooter = new Shooter(mRobotMap, mInputManager, mVision);
   }
 
   @Override
@@ -82,8 +82,11 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     mInputManager.update(0);
-    climber.handleInput();
-    climber.update(); 
+    // climber.handleInput();
+    // climber.update(); 
+
+    // mRobotMap.driveRightBack.set(1);
+    // mRobotMap.driveLeftBack.set(1);
    
     //Driver Controls
     // mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);

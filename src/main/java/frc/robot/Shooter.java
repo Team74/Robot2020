@@ -14,11 +14,11 @@ public class Shooter {
     private BaseMotorController indexer;
     private BaseMotorController uptake;
 
-    private DigitalInput limitSwitch;
-    private DigitalInput limitSwitch2;
+    private DigitalInput uptakeLimit;
+    private DigitalInput indexerRotationLimit;
+    private DigitalInput[] ballLimits;
 
     private InputManager inputManager;
-    private 
 
     private Boolean flywheelOn = false;
     private int intakeState = 0;
@@ -26,6 +26,7 @@ public class Shooter {
     private int hoodState = 0;
     private boolean isAdvancing = false;
     private int shootState = 0;
+    private int indexerState = 0;
 
     private int shootProgress = 1;
     private int runUptake = 10;
@@ -42,8 +43,6 @@ public class Shooter {
         this.turret = robotMap.turret;
         this.hood = robotMap.hood;
         this.intake = robotMap.intake;
-        this.limitSwitch = robotMap.LimitSwitch;
-        this.limitSwitch2 = robotMap.LimitSwitch2;
         this.indexer = robotMap.indexer;
         this.uptake = robotMap.uptake;
         this.inputManager = inputManager;
@@ -204,21 +203,25 @@ public class Shooter {
         }
     }
 
+    public void autoIndex() {
+
+    }
+
     private void startShooting() {
         flywheelOn = true;
     }
 
     private boolean hasAdvanced() {
-        return !limitSwitch.get();
+        return !indexerRotationLimit.get();
     }
 
     private boolean hasPrepedBall() {
-        return !limitSwitch2.get();
+        return !uptakeLimit.get();
     }
 
     private void alignShooter() {
         autoTurretState = TurretState.Tracking;
-        if ()
+        //if ()
         //If no target in screen
             //Turn to left limit
             //Check for target in screen periodically
@@ -238,5 +241,13 @@ public class Shooter {
         Holding,
         ReadyToShoot,
         Manual;
+    }
+
+    public enum IndexerState {
+        NoBalls,
+        Rotate,
+        StopRotating,
+        UptakeBall,
+        StopUptake;
     }
 }
