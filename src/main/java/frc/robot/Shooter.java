@@ -26,7 +26,7 @@ public class Shooter {
     private int hoodState = 0;
     private boolean isAdvancing = false;
     private int shootState = 0;
-    private int indexerState = 0;
+    private IndexerState indexerState = IndexerState.NoBalls;
 
     private int shootProgress = 1;
     private int runUptake = 10;
@@ -45,6 +45,11 @@ public class Shooter {
         this.intake = robotMap.intake;
         this.indexer = robotMap.indexer;
         this.uptake = robotMap.uptake;
+        
+        this.uptakeLimit = robotMap.uptakeLimit;
+        this.indexerRotationLimit = robotMap.indexerRotationLimit;
+        this.ballLimits = robotMap.ballLimit;
+
         this.inputManager = inputManager;
     }
 
@@ -61,7 +66,7 @@ public class Shooter {
             flywheelHold = 0;
         }
         //Intake
-        if (inputManager.opA || inputManager.opB) {
+        /*if (inputManager.opA || inputManager.opB) {
             if (inputManager.opA && !inputManager.opB && intakeHold == 0) {
                 intakeState = 1;
             } else if (!inputManager.opA && inputManager.opB && intakeHold == 0) {
@@ -71,6 +76,12 @@ public class Shooter {
         } else {
             intakeState = 0;
             intakeHold = 0;
+        }*/
+
+        if (inputManager.opA) {
+            intakeState = 1;
+        } else if (inputManager.opB) {
+            intakeState = 0;
         }
         //Turret & hood
         if (inputManager.opPOV != -1 && inputManager.opLeftTrigger < .85) {
@@ -122,8 +133,6 @@ public class Shooter {
     }
 
     public void update() {
-        System.out.println("shoot State " + shootState);
-        System.out.println("shoot progress " + shootProgress);
         if (flywheelOn) {
            flywheel.set(ControlMode.PercentOutput, 10);
         } else {
@@ -171,7 +180,7 @@ public class Shooter {
 
         if (isAdvancing) {
             indexer.set(ControlMode.PercentOutput, 20);
-            isAdvancing = !hasAdvanced();
+            isAdvancing = hasAdvanced();
         } else {
             indexer.set(ControlMode.PercentOutput, 0);
         }
@@ -204,15 +213,64 @@ public class Shooter {
     }
 
     public void autoIndex() {
-
+        System.out.println(indexerState);
+        System.out.println(isAdvancing);
+        switch (indexerState) {
+            case NoBalls:
+                if(inputManager.driverA == true && intakeState == 1) {
+                    indexerState = IndexerState.Rotate;
+                }
+                break;
+            case Rotate:
+                isAdvancing = true;
+                indexerState = IndexerState.StopRotating;
+                break;
+            case StopRotating:
+                if (!isAdvancing) {
+                    if (indexerFull() && uptakeLimit.get()) {
+                        indexerState = IndexerState.StopRotating;
+                        break;
+                    }
+                    if ((!indexerFull() && inputManager.driverA) || (intakeState != 1 && !inputManager.driverX)) {
+                        indexerState = IndexerState.Rotate;
+                        break;
+                    }
+                    if (uptakeLimit.get() && inputManager.driverX) {
+                        indexerState = IndexerState.UptakeBall;
+                        break;
+                    }
+                }
+                break;
+            case UptakeBall:
+                uptake.set(ControlMode.PercentOutput, 100);
+                indexerState = IndexerState.StopUptake;
+                break;
+            case StopUptake:
+                if (uptakeLimit.get()) {
+                    if (inputManager.driverA || inputManager.driverB || inputManager.driverY || inputManager.driverX) {
+                        indexerState = IndexerState.Rotate;
+                    } else {
+                        indexerState = IndexerState.NoBalls;
+                    }
+                }
+                break;
+        }
     }
 
     private void startShooting() {
         flywheelOn = true;
     }
 
+    private boolean indexerFull() {
+        if (inputManager.driverA && inputManager.driverB && inputManager.driverY && inputManager.driverX) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean hasAdvanced() {
-        return !indexerRotationLimit.get();
+        return indexerRotationLimit.get();
     }
 
     private boolean hasPrepedBall() {

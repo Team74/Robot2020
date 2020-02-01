@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
 
     climber = new Climber(mInputManager, mRobotMap);
     mVision = Vision.getInstance();
-    // shooter = new Shooter(mRobotMap, mInputManager);
+    shooter = new Shooter(mRobotMap, mInputManager, mVision);
   }
 
   @Override
@@ -56,6 +56,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
+    mRobotMap.gearShiftLeft.set(Value.kForward);
+    // mRobotMap.gearShiftLeft.set(Value.kReverse);
     //m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
   }
@@ -82,6 +84,30 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     mInputManager.update(0);
+    // shooter.handleInput();
+    // shooter.update();
+    // shooter.autoIndex();
+    if (mInputManager.driverA) {
+      mRobotMap.gearShiftLeft.set(Value.kForward);
+    } else {
+
+    }
+    if (mInputManager.driverB) {
+      mRobotMap.gearShiftLeft.set(Value.kReverse);
+    } else {
+
+    }
+    if (mInputManager.driverX) {
+      mRobotMap.driveLeftFront.set(.50);
+    } else {
+      mRobotMap.driveLeftFront.set(0);
+    }
+    if (mInputManager.driverY) {
+      mRobotMap.driveLeftBack.set(.50);
+    } else {
+      mRobotMap.driveLeftBack.set(0);
+    }
+
     // climber.handleInput();
     // climber.update(); 
 

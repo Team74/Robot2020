@@ -8,6 +8,7 @@ import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.*;
 import com.revrobotics.CANDigitalInput.LimitSwitch;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Encoder;
@@ -48,11 +49,16 @@ public class RobotMap {
     public TalonSRX cliberBalence= new TalonSRX(0);
     //find CAN id
 
-    public DigitalInput LimitSwitch = new DigitalInput(1);
-    public DigitalInput LimitSwitch2 = new DigitalInput(2);
+    public DigitalInput uptakeLimit = new DigitalInput(0);
+    public DigitalInput indexerRotationLimit = new DigitalInput(1);
+    public DigitalInput [] ballLimit = {new DigitalInput(2), 
+                                        new DigitalInput(3), 
+                                        new DigitalInput(4), 
+                                        new DigitalInput(5), 
+                                        new DigitalInput(6)};
 
-    //public DoubleSolenoid gearShift = new DoubleSolenoid(49, 0, 1);
-
+    public Compressor compressor = new Compressor(0);
+    public DoubleSolenoid gearShiftLeft;
 
 
      //public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
@@ -63,6 +69,7 @@ public class RobotMap {
         // drive_E_2 = drive_2.getEncoder();
         // drive_E_3 = drive_3.getEncoder();
         //flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        gearShiftLeft = new DoubleSolenoid(49, 0, 1);
     }
 
     public static RobotMap getInstance() {
