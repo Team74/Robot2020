@@ -25,10 +25,10 @@ public class Shooter {
     private int turretState = 0;
     private int hoodState = 0;
     private boolean isAdvancing = false;
-    private int shootState = 0;
+    private ShooterState shootState = ShooterState.NotShooting;
     private IndexerState indexerState = IndexerState.NoBalls;
 
-    private int shootProgress = 1;
+    // private int shootProgress = 1;
     private int runUptake = 10;
 
     private int flywheelHold = 0;
@@ -102,34 +102,34 @@ public class Shooter {
             hoodState = 0;
         }
 
-        if (inputManager.opY && indexerHold == 0) {
-            isAdvancing = true;
-            indexerHold++;
-        } else if (!inputManager.opY && shootState == 0) {
-            isAdvancing = false;
-            indexerHold = 0;
-        }
+        // if (inputManager.opY && indexerHold == 0) {
+        //     isAdvancing = true;
+        //     indexerHold++;
+        // } else if (!inputManager.opY && shootState == 0) {
+        //     isAdvancing = false;
+        //     indexerHold = 0;
+        // }
 
         //shooter
-        int holdTime = 16;
+        // int holdTime = 16;
         double triggerIsPressed = .85;
-        if (inputManager.opRightTrigger > triggerIsPressed) {
-          shootHold++;
-          shootState = 0;
-          if (shootHold > holdTime) {
-            System.out.println("Fire all Balls");
-            shootState = 2;
-          }
-        } else {
-          if (shootHold > 0 && shootHold < holdTime) {
-            System.out.println("Fire one Ball");
-            shootState = 1;
-          } else if (shootHold > 0 && shootHold > holdTime) {
-            System.out.println("Stopping Multifire");
-            shootState = 0;
-          }
-          shootHold = 0;
-        }
+        // if (inputManager.opRightTrigger > triggerIsPressed) {
+        //   shootHold++;
+        //   shootState = 0;
+        //   if (shootHold > holdTime) {
+        //     System.out.println("Fire all Balls");
+        //     shootState = 2;
+        //   }
+        // } else {
+        //   if (shootHold > 0 && shootHold < holdTime) {
+        //     System.out.println("Fire one Ball");
+        //     shootState = 1;
+        //   } else if (shootHold > 0 && shootHold > holdTime) {
+        //     System.out.println("Stopping Multifire");
+        //     shootState = 0;
+        //   }
+        //   shootHold = 0;
+        // }
     }
 
     public void update() {
@@ -185,74 +185,96 @@ public class Shooter {
             indexer.set(ControlMode.PercentOutput, 0);
         }
 
-        if (shootState > 0) {
-            startShooting();
-            if (shootProgress == 1) {
-                if (hasPrepedBall()) {
-                    shootProgress++;
-                } else {
-                    isAdvancing = true;
-                }
-            } 
-            if (shootProgress == 2) {
-                if (runUptake != 0) {
-                  uptake.set(ControlMode.PercentOutput, 45);
-                  runUptake--;
-                } else {
-                  uptake.set(ControlMode.PercentOutput, 0);
-                  runUptake = 10;
-                  shootProgress = 1;
-                  if (shootState == 1) {
-                      shootState = 0;
-                  }
-                }
-            }
-        } else {
-            uptake.set(ControlMode.PercentOutput, 0);
+        switch (shootState) {
+            case NotShooting:
+                break;
+            case ShootBall:
+                break;
+            case LoadBall:
+                break;
+            case FlywheelOn:
+                break;
+            case FlywheelOff:
+                break;
         }
+
+        // if (shootState != ShooterState.NotShooting) {
+        //     startShooting(); // Check if flywheel up to speed
+        //     if (shootProgress == 1) {
+        //         if (hasPrepedBall()) {
+        //             shootProgress++;
+        //         }
+        //     }
+        //     if (shootProgress == 2) {
+        //         if (runUptake != 0) {
+        //           uptake.set(ControlMode.PercentOutput, 45);
+        //           runUptake--;
+        //         } else {
+        //           uptake.set(ControlMode.PercentOutput, 0);
+        //           runUptake = 10;
+        //           shootProgress = 1;
+        //           if (shootState == 1) {
+        //               shootState = 0;
+        //           }
+        //         }
+        //     }
+        // } else {
+        //     uptake.set(ControlMode.PercentOutput, 0);
+        // }
     }
 
     public void autoIndex() {
         System.out.println(indexerState);
-        System.out.println(isAdvancing);
+        System.out.println(hasAdvanced());
+        System.out.println(hasPrepedBall());
         switch (indexerState) {
+            //checks for the first ball intook
             case NoBalls:
                 if(inputManager.driverA == true && intakeState == 1) {
                     indexerState = IndexerState.Rotate;
                 }
                 break;
+            //rotates the indexer
             case Rotate:
                 isAdvancing = true;
-                indexerState = IndexerState.StopRotating;
-                break;
-            case StopRotating:
-                if (!isAdvancing) {
-                    if (indexerFull() && uptakeLimit.get()) {
-                        indexerState = IndexerState.StopRotating;
-                        break;
-                    }
-                    if ((!indexerFull() && inputManager.driverA) || (intakeState != 1 && !inputManager.driverX)) {
-                        indexerState = IndexerState.Rotate;
-                        break;
-                    }
-                    if (uptakeLimit.get() && inputManager.driverX) {
-                        indexerState = IndexerState.UptakeBall;
-                        break;
-                    }
+                if (hasAdvanced()) {
+                    indexerState = IndexerState.StopRotating;
+                    isAdvancing = false;
                 }
                 break;
+            //stops rotating
+            case StopRotating: 
+                //no places left and uptake ready
+                if (indexerFull() && hasPrepedBall()) {
+                    indexerState = IndexerState.StopRotating;
+                    break;
+                }
+                //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
+                if ((!indexerFull() && inputManager.driverA) || (intakeState != 1 && !inputManager.driverX)) {
+                    indexerState = IndexerState.Rotate;
+                    break;
+                }
+                //ball in uptake pos and uptake empty
+                if (!hasPrepedBall() && inputManager.driverX) {
+                    indexerState = IndexerState.UptakeBall;
+                    break;
+                }
+                break;
+            //uptakes a ball
             case UptakeBall:
                 uptake.set(ControlMode.PercentOutput, 100);
-                indexerState = IndexerState.StopUptake;
-                break;
-            case StopUptake:
-                if (uptakeLimit.get()) {
-                    if (inputManager.driverA || inputManager.driverB || inputManager.driverY || inputManager.driverX) {
-                        indexerState = IndexerState.Rotate;
-                    } else {
-                        indexerState = IndexerState.NoBalls;
-                    }
+                if (hasPrepedBall()) {
+                    indexerState = IndexerState.StopUptake;
                 }
+                break;
+            //stops the uptake
+            case StopUptake:
+                if (inputManager.driverA || inputManager.driverB || inputManager.driverY || inputManager.driverX) {
+                    indexerState = IndexerState.Rotate;
+                } else {
+                    indexerState = IndexerState.NoBalls;
+                }
+                
                 break;
         }
     }
@@ -270,7 +292,7 @@ public class Shooter {
     }
 
     private boolean hasAdvanced() {
-        return indexerRotationLimit.get();
+        return !indexerRotationLimit.get();
     }
 
     private boolean hasPrepedBall() {
@@ -307,5 +329,13 @@ public class Shooter {
         StopRotating,
         UptakeBall,
         StopUptake;
+    }
+
+    public enum ShooterState {
+        NotShooting,
+        FlywheelOn,
+        FlywheelOff,
+        ShootBall,
+        LoadBall;
     }
 }

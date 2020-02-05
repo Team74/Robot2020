@@ -84,29 +84,30 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     mInputManager.update(0);
-    // shooter.handleInput();
-    // shooter.update();
-    // shooter.autoIndex();
-    if (mInputManager.driverA) {
-      mRobotMap.gearShiftLeft.set(Value.kForward);
-    } else {
+    shooter.handleInput();
+    shooter.update();
+    shooter.autoIndex();
 
-    }
-    if (mInputManager.driverB) {
-      mRobotMap.gearShiftLeft.set(Value.kReverse);
-    } else {
+    // if (mInputManager.driverA) {
+    //   mRobotMap.gearShiftLeft.set(Value.kForward);
+    // } else {
 
-    }
-    if (mInputManager.driverX) {
-      mRobotMap.driveLeftFront.set(.50);
-    } else {
-      mRobotMap.driveLeftFront.set(0);
-    }
-    if (mInputManager.driverY) {
-      mRobotMap.driveLeftBack.set(.50);
-    } else {
-      mRobotMap.driveLeftBack.set(0);
-    }
+    // }
+    // if (mInputManager.driverB) {
+    //   mRobotMap.gearShiftLeft.set(Value.kReverse);
+    // } else {
+
+    // }
+    // if (mInputManager.driverX) {
+    //   mRobotMap.driveLeftFront.set(.50);
+    // } else {
+    //   mRobotMap.driveLeftFront.set(0);
+    // }
+    // if (mInputManager.driverY) {
+    //   mRobotMap.driveLeftBack.set(.50);
+    // } else {
+    //   mRobotMap.driveLeftBack.set(0);
+    // }
 
     // climber.handleInput();
     // climber.update(); 

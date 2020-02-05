@@ -12,8 +12,8 @@ public class Climber {
     private int balenceState = 0;
 
     public Climber(InputManager inputManager, RobotMap robotMap) {
-        climbMotor = robotMap.climber;
-        balenceMotor = robotMap.cliberBalence;
+        // climbMotor = robotMap.climber;
+        // balenceMotor = robotMap.cliberBalence;
         this.inputManager = inputManager;
     }
 
