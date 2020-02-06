@@ -88,26 +88,16 @@ public class Robot extends TimedRobot {
     shooter.update();
     shooter.autoIndex();
 
-    // if (mInputManager.driverA) {
-    //   mRobotMap.gearShiftLeft.set(Value.kForward);
-    // } else {
+    if (mInputManager.driverLeftBumper) {
+       mRobotMap.gearShiftLeft.set(Value.kForward);
+     } else {
 
-    // }
-    // if (mInputManager.driverB) {
-    //   mRobotMap.gearShiftLeft.set(Value.kReverse);
-    // } else {
+     }
+     if (mInputManager.driverRightBumper) {
+       mRobotMap.gearShiftLeft.set(Value.kReverse);
+     } else {
 
-    // }
-    // if (mInputManager.driverX) {
-    //   mRobotMap.driveLeftFront.set(.50);
-    // } else {
-    //   mRobotMap.driveLeftFront.set(0);
-    // }
-    // if (mInputManager.driverY) {
-    //   mRobotMap.driveLeftBack.set(.50);
-    // } else {
-    //   mRobotMap.driveLeftBack.set(0);
-    // }
+     }
 
     // climber.handleInput();
     // climber.update(); 
@@ -116,7 +106,7 @@ public class Robot extends TimedRobot {
     // mRobotMap.driveLeftBack.set(1);
    
     //Driver Controls
-    // mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);
+    mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverLeftStickX);
  /*
     if (mInputManager.driverPOV == 0) {
       System.out.println("Climber Extend");
