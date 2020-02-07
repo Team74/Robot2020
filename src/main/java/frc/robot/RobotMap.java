@@ -58,7 +58,8 @@ public class RobotMap {
                                         new DigitalInput(6)};
 
     public Compressor compressor = new Compressor(0);
-    public DoubleSolenoid gearShiftLeft;
+    public DoubleSolenoid gearShift = new DoubleSolenoid(49, 0, 1);
+    public DoubleSolenoid intakeArm = new DoubleSolenoid(49, 2, 3);
 
 
      //public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
@@ -69,7 +70,7 @@ public class RobotMap {
         // drive_E_2 = drive_2.getEncoder();
         // drive_E_3 = drive_3.getEncoder();
         //flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
-        gearShiftLeft = new DoubleSolenoid(49, 0, 1);
+
         driveLeft.setInverted(true);
         driveRight.setInverted(true);
     }

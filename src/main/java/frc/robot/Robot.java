@@ -56,7 +56,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    mRobotMap.gearShiftLeft.set(Value.kForward);
+    mRobotMap.gearShift.set(Value.kForward);
     // mRobotMap.gearShiftLeft.set(Value.kReverse);
     //m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
     System.out.println("Auto selected: " + m_autoSelected);
@@ -89,12 +89,12 @@ public class Robot extends TimedRobot {
     shooter.autoIndex();
 
     if (mInputManager.driverLeftBumper) {
-       mRobotMap.gearShiftLeft.set(Value.kForward);
+       mRobotMap.gearShift.set(Value.kForward);
      } else {
 
      }
      if (mInputManager.driverRightBumper) {
-       mRobotMap.gearShiftLeft.set(Value.kReverse);
+       mRobotMap.gearShift.set(Value.kReverse);
      } else {
 
      }
