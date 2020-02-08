@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
-public class Shooter {
+public class Shooter implements Updateable {
     private BaseMotorController flywheel;
     private BaseMotorController turret;
     private BaseMotorController hood;
@@ -126,7 +126,7 @@ public class Shooter {
         }
     }
 
-    public void update() {
+    public void update(double dt) {
         if (flywheelOn) {
            flywheel.set(ControlMode.PercentOutput, 10);
         } else {
@@ -251,7 +251,7 @@ public class Shooter {
         switch (indexerState) {
             //checks for the first ball intook
             case NoBalls:
-                if(inputManager.driverA == true && intakeState == IntakeState.IntakeDown) {
+                if(ballLimits[0].get() == true && intakeState == IntakeState.IntakeDown) {
                     indexerState = IndexerState.Rotate;
                 }
                 break;
@@ -271,12 +271,12 @@ public class Shooter {
                     break;
                 }
                 //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
-                if ((!indexerFull() && inputManager.driverA) || (intakeState != IntakeState.IntakeDown && !inputManager.driverX)) {
+                if ((!indexerFull() && ballLimits[0].get()) || (intakeState != IntakeState.IntakeDown && !ballLimits[3].get())) {
                     indexerState = IndexerState.Rotate;
                     break;
                 }
                 //ball in uptake pos and uptake empty
-                if (!hasPrepedBall() && inputManager.driverX) {
+                if (!hasPrepedBall() && ballLimits[3].get()) {
                     indexerState = IndexerState.UptakeBall;
                     break;
                 }
@@ -290,7 +290,7 @@ public class Shooter {
                 break;
             //stops the uptake
             case StopUptake:
-                if (inputManager.driverA || inputManager.driverB || inputManager.driverY || inputManager.driverX) {
+                if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
                     indexerState = IndexerState.Rotate;
                 } else {
                     indexerState = IndexerState.NoBalls;
@@ -301,7 +301,7 @@ public class Shooter {
     }
 
     private boolean indexerFull() {
-        if (ballLimits[0].get() && ballLimits[1].get() && ballLimits[2].get() && ballLimits[3].get() && ballLimits[4].get()) {
+        if (ballLimits[0].get() && ballLimits[1].get() && ballLimits[2].get() && ballLimits[3].get()) {
             return true;
         } else {
             return false;

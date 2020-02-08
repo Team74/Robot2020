@@ -29,12 +29,10 @@ public class RobotMap {
      public CANSparkMax driveRightBack = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
      public SpeedControllerGroup driveRight = new SpeedControllerGroup(driveRightFront, driveRightBack);
 
-     public DifferentialDrive drive = new DifferentialDrive(driveLeft, driveRight);
-
-    // public CANEncoder drive_E_0;
-    // public CANEncoder drive_E_1;
-    // public CANEncoder drive_E_2;
-    // public CANEncoder drive_E_3;
+    public CANEncoder driveLeftFrontEncoder;
+    public CANEncoder driveLeftBackEncoder;
+    public CANEncoder driveRightFrontEncoder;
+    public CANEncoder driveRightBackEncoder;
 
     public TalonSRX intake = new TalonSRX(18);         
     public VictorSPX flywheel = new VictorSPX(6);
@@ -65,10 +63,10 @@ public class RobotMap {
      //public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
 
     private RobotMap() {
-        // drive_E_0 = drive_0.getEncoder();
-        // drive_E_1 = drive_1.getEncoder();
-        // drive_E_2 = drive_2.getEncoder();
-        // drive_E_3 = drive_3.getEncoder();
+        driveLeftFrontEncoder = driveLeftFront.getEncoder();
+        driveLeftBackEncoder = driveLeftBack.getEncoder();
+        driveRightFrontEncoder = driveRightFront.getEncoder();
+        driveRightBackEncoder = driveRightBack.getEncoder();
         //flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
         driveLeft.setInverted(true);

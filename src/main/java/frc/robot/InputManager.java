@@ -62,15 +62,11 @@ public class InputManager implements Updateable {
         return kInstance;
     }
 
-    double driveScaler = 1;
-    double turnScaler = driveScaler * .8;
     public void update(double dt) {
-        turnScaler = driveScaler * .8;
-
-        driverLeftStickY = driveScaler*mController0.getY(Hand.kLeft);
-        driverLeftStickX = -turnScaler*mController0.getX(Hand.kLeft);
-        driverRightStickY = driveScaler*mController0.getY(Hand.kRight);
-        driverRightStickX = -turnScaler*mController0.getX(Hand.kRight);
+        driverLeftStickY = mController0.getY(Hand.kLeft);
+        driverLeftStickX = mController0.getX(Hand.kLeft);
+        driverRightStickY = mController0.getY(Hand.kRight);
+        driverRightStickX = mController0.getX(Hand.kRight);
 
         driverA = mController0.getAButton();
         driverB = mController0.getBButton();

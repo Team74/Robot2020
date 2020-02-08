@@ -10,6 +10,8 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -29,8 +31,12 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  ArrayList<Updateable> updateableObjects = new ArrayList<>();
+
   RobotMap mRobotMap;
   InputManager mInputManager;
+
+  Drivebase drivebase;
   Climber climber;
   Shooter shooter;
   Vision mVision;
@@ -43,10 +49,15 @@ public class Robot extends TimedRobot {
 
     mRobotMap = RobotMap.getInstance();
     mInputManager = InputManager.getInstance();
+    updateableObjects.add(mInputManager);
 
+    drivebase = new Drivebase();
+    updateableObjects.add(drivebase);
     climber = new Climber(mInputManager, mRobotMap);
+    updateableObjects.add(climber);
     mVision = Vision.getInstance();
     shooter = new Shooter(mRobotMap, mInputManager, mVision);
+    updateableObjects.add(shooter);
   }
 
   @Override
@@ -73,29 +84,20 @@ public class Robot extends TimedRobot {
     }
   }
 
+  @Override
+  public void teleopInit() {
+    mRobotMap.gearShift.set(Value.kForward);
+  }
+
 
   @Override
   public void teleopPeriodic() {
-    mInputManager.update(0);
+    for(Updateable object : updateableObjects) {
+      object.update(0.0);
+    }
+
     shooter.handleInput();
-    shooter.update();
     shooter.autoIndex();
-    System.out.println(mRobotMap.intake.getOutputCurrent());
-
-    if (mInputManager.driverLeftBumper) {
-       mRobotMap.gearShift.set(Value.kForward);
-     } else {
-
-     }
-     if (mInputManager.driverRightBumper) {
-       mRobotMap.gearShift.set(Value.kReverse);
-     }
-
-     if (mInputManager.driverTriggerRight > .85) {
-      mInputManager.driveScaler = .5;
-     } else {
-      mInputManager.driveScaler = 1;
-     }
 
     // climber.handleInput();
     // climber.update(); 
@@ -104,7 +106,6 @@ public class Robot extends TimedRobot {
     // mRobotMap.driveLeftBack.set(1);
    
     //Driver Controls
-    mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);
   }
 
   @Override

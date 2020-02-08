@@ -3,7 +3,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
-public class Climber {
+public class Climber implements Updateable {
     private InputManager inputManager;
     private BaseMotorController climbMotor;
     private BaseMotorController balenceMotor;
@@ -34,7 +34,7 @@ public class Climber {
         } 
     }
 
-    public void update() {
+    public void update(double dt) {
         switch(climberState) {
             case 1:
                 climbMotor.set(ControlMode.PercentOutput, -50);
