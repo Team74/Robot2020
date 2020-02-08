@@ -40,7 +40,7 @@ public class Shooter {
     private int runUptake = 10;
 
     private int flywheelHold = 0;
-    private int intakeHold = 0;
+    private boolean opAhold = false;
     private int indexerHold = 0;
     private int shootHold = 0;
 
@@ -88,10 +88,14 @@ public class Shooter {
             intakeHold = 0;
         }*/
 
-        if (inputManager.opA) {
+        if (inputManager.opA && !intakeFrwd && !opAhold) {
             intakeFrwd = true;
-        } else {
+            opAhold = true;
+        } else if (inputManager.opA && intakeFrwd && !opAhold) {
             intakeFrwd = false;
+            opAhold = true;
+        } else if (!inputManager.opA) {
+            opAhold = false;
         }
 
         if (inputManager.opB) {
@@ -199,14 +203,39 @@ public class Shooter {
     }
 
     public void intake() {
+        System.out.println(intakeState);
         switch (intakeState) {
+            //Make sure that the intake is up, and off.
             case IntakeUp:
                 intakeArm.set(Value.kReverse);
                 intake.set(ControlMode.PercentOutput, 0);
+
+                if (intakeFrwd && !intakeRev) {
+                    intakeState = IntakeState.IntakeDown;
+                } else if (intakeRev && !intakeFrwd) {
+                    intakeState = IntakeState.IntakeDownRev;
+                }
                 break;
+            //deploy the intake
             case IntakeDown:
+                intakeArm.set(Value.kForward);
+                intake.set(ControlMode.PercentOutput, 100);
+
+                if (indexerFull() && !intakeFrwd) {
+                    intakeState = IntakeState.IntakeUp;
+                } else if (intakeRev) {
+                    intakeState = IntakeState.IntakeDownRev;
+                }
                 break;
-            case Reverse:
+            //reverse the intake, once it is deployed
+            case IntakeDownRev:
+                intake.set(ControlMode.PercentOutput, -100);
+                 
+                if (!intakeFrwd) {
+                    intakeState = IntakeState.IntakeUp;
+                } else if (!intakeRev) {
+                    intakeState = IntakeState.IntakeDown;
+                }
                 break;
             case Indexing: //Unknown if this is needed
                 break;
@@ -253,9 +282,6 @@ public class Shooter {
     }
 
     public void autoIndex() {
-        System.out.println(indexerState);
-        System.out.println(hasAdvanced());
-        System.out.println(hasPrepedBall());
         switch (indexerState) {
             //checks for the first ball intook
             case NoBalls:
@@ -371,8 +397,8 @@ public class Shooter {
     public enum IntakeState {
         IntakeUp,
         IntakeDown,
-        Reverse,
-        Indexing; //We dont know if this will be needed
+        IntakeDownRev,
+        Indexing; //We dont know if this will be needed, not currently called
     }
 
     public enum ShooterState {
