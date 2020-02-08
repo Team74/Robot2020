@@ -33,6 +33,9 @@ public class InputManager implements Updateable {
     public boolean driverLeftBumper = false;
     public boolean driverRightBumper = false;
 
+    public double driverTriggerLeft = 0;
+    public double driverTriggerRight = 0;
+
     public int driverPOV = -1;
 
     //operator buttons
@@ -59,20 +62,23 @@ public class InputManager implements Updateable {
         return kInstance;
     }
 
-    private InputManager() {
-        
-    }
-
+    double driveScaler = 1;
+    double turnScaler = driveScaler * .8;
     public void update(double dt) {
-        driverLeftStickY = 0.5*mController0.getY(Hand.kLeft);
-        driverLeftStickX = -0.5*mController0.getX(Hand.kLeft);
-        driverRightStickY = mController0.getY(Hand.kRight);
-        driverRightStickX = -mController0.getX(Hand.kRight);
+        turnScaler = driveScaler * .8;
+
+        driverLeftStickY = driveScaler*mController0.getY(Hand.kLeft);
+        driverLeftStickX = -turnScaler*mController0.getX(Hand.kLeft);
+        driverRightStickY = driveScaler*mController0.getY(Hand.kRight);
+        driverRightStickX = -turnScaler*mController0.getX(Hand.kRight);
 
         driverA = mController0.getAButton();
         driverB = mController0.getBButton();
         driverX = mController0.getXButton();
         driverY = mController0.getYButton();
+
+        driverTriggerLeft = mController0.getTriggerAxis(Hand.kLeft);
+        driverTriggerRight = mController0.getTriggerAxis(Hand.kRight);
 
         driverLeftBumper = mController0.getBumper(Hand.kLeft);
         driverRightBumper = mController0.getBumper(Hand.kRight);

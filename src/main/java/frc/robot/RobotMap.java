@@ -36,7 +36,7 @@ public class RobotMap {
     // public CANEncoder drive_E_2;
     // public CANEncoder drive_E_3;
 
-    public VictorSPX intake = new VictorSPX(0);         
+    public TalonSRX intake = new TalonSRX(18);         
     public VictorSPX flywheel = new VictorSPX(6);
     public VictorSPX test = new VictorSPX(6);
     public TalonSRX turret = new TalonSRX(0);

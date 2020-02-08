@@ -76,18 +76,6 @@ public class Shooter {
             flywheelHold = 0;
         }
         //Intake
-        /*if (inputManager.opA || inputManager.opB) {
-            if (inputManager.opA && !inputManager.opB && intakeHold == 0) {
-                intakeState = 1;
-            } else if (!inputManager.opA && inputManager.opB && intakeHold == 0) {
-                intakeState = -1;
-            }
-            intakeHold++;
-        } else {
-            intakeState = 0;
-            intakeHold = 0;
-        }*/
-
         if (inputManager.opA && !intakeFrwd && !opAhold) {
             intakeFrwd = true;
             opAhold = true;
@@ -136,26 +124,6 @@ public class Shooter {
         } else {
             shooterOn = false;
         }
-
-        //shooter
-        // int holdTime = 16;
-        // if (inputManager.opRightTrigger > triggerIsPressed) {
-        //   shootHold++;
-        //   shootState = 0;
-        //   if (shootHold > holdTime) {
-        //     System.out.println("Fire all Balls");
-        //     shootState = 2;
-        //   }
-        // } else {
-        //   if (shootHold > 0 && shootHold < holdTime) {
-        //     System.out.println("Fire one Ball");
-        //     shootState = 1;
-        //   } else if (shootHold > 0 && shootHold > holdTime) {
-        //     System.out.println("Stopping Multifire");
-        //     shootState = 0;
-        //   }
-        //   shootHold = 0;
-        // }
     }
 
     public void update() {
@@ -210,10 +178,8 @@ public class Shooter {
                 intakeArm.set(Value.kReverse);
                 intake.set(ControlMode.PercentOutput, 0);
 
-                if (intakeFrwd && !intakeRev) {
+                if (intakeFrwd) {
                     intakeState = IntakeState.IntakeDown;
-                } else if (intakeRev && !intakeFrwd) {
-                    intakeState = IntakeState.IntakeDownRev;
                 }
                 break;
             //deploy the intake
