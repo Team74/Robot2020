@@ -25,10 +25,10 @@ public class InputManager implements Updateable {
     public double driverRightStickY = 0;
     public double driverRightStickX = 0;
 
-    public static boolean driverA = false;
-    public static boolean driverB = false;
-    public static boolean driverX = false;
-    public static boolean driverY = false;
+    public boolean driverA = false;
+    public boolean driverB = false;
+    public boolean driverX = false;
+    public boolean driverY = false;
 
     public boolean driverLeftBumper = false;
     public boolean driverRightBumper = false;
@@ -95,6 +95,10 @@ public class InputManager implements Updateable {
         opLeftTrigger = mController1.getTriggerAxis(Hand.kLeft);
 
         opPOV = mController1.getPOV();
+    }
+
+    public void dashboard() {
+        //unused
     }
 
 }

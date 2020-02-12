@@ -4,6 +4,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
 public class Climber implements Updateable {
+    private static Climber kInstance = null;
     private InputManager inputManager;
     private BaseMotorController climbMotor;
     private BaseMotorController balenceMotor;
@@ -11,12 +12,22 @@ public class Climber implements Updateable {
     private int climberState = 0;
     private int balenceState = 0;
 
-    public Climber(InputManager inputManager, RobotMap robotMap) {
-        // climbMotor = robotMap.climber;
-        // balenceMotor = robotMap.cliberBalence;
-        this.inputManager = inputManager;
+    public static Climber getInstance() {
+        if (kInstance == null) {
+            kInstance = new Climber();
+        } 
+        return kInstance;
     }
 
+    public Climber() {
+        climbMotor = Robot.robotMap.climber;
+        balenceMotor = Robot.robotMap.cliberBalence;
+        inputManager = Robot.inputManager;
+    }
+
+    public void dashboard() {
+
+    }
     public void handleInput() {
         if (inputManager.driverPOV != -1) {
             if(inputManager.driverPOV == 0) {

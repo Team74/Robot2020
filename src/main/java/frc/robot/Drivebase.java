@@ -1,12 +1,11 @@
 package frc.robot;
 
-import com.revrobotics.CANSparkMax;
-
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Drivebase implements Updateable {
+    private static Drivebase kInstance = null;
     private InputManager inputManager;
     private RobotMap robotMap;
     private DifferentialDrive differentialDrive;
@@ -14,10 +13,17 @@ public class Drivebase implements Updateable {
     private SpeedControllerGroup leftMotor, rightMotor;
 
     private double driveScaler = 1;
-    private double turnScaler = driveScaler * .8;
+    private double turnScaler = driveScaler;
+    
+    public static Drivebase getInstance() {
+        if (kInstance == null) {
+            kInstance = new Drivebase();
+        } 
+        return kInstance;
+    }
 
-    public Drivebase(InputManager im) {
-        inputManager = im;
+    public Drivebase() {
+        inputManager = Robot.inputManager;
         robotMap = RobotMap.getInstance();
         leftMotor = robotMap.driveLeft; 
         rightMotor = robotMap.driveRight;
@@ -25,8 +31,12 @@ public class Drivebase implements Updateable {
         differentialDrive = new DifferentialDrive(leftMotor, rightMotor);
     }
 
+    public void dashboard() {
+        
+    }
+
     public void update(double dt) {
-        differentialDrive.arcadeDrive(inputManager.driverLeftStickY, -inputManager.driverRightStickX);
+        differentialDrive.arcadeDrive(driveScaler * inputManager.driverLeftStickY, -turnScaler* inputManager.driverRightStickX);
 
         if (inputManager.driverLeftBumper) {
             handleShift(ShiftState.Low);
@@ -39,7 +49,7 @@ public class Drivebase implements Updateable {
           } else {
            driveScaler = 1;
           }
-          turnScaler = driveScaler * .8;
+          turnScaler = driveScaler;
     }
     
     public void handleShift(ShiftState newState) {

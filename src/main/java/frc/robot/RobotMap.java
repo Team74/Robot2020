@@ -1,22 +1,16 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.*;
-import com.revrobotics.CANDigitalInput.LimitSwitch;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.SPI;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class RobotMap {
     private static RobotMap kInstance = null;
@@ -43,8 +37,8 @@ public class RobotMap {
     public VictorSPX uptake = new VictorSPX(7); 
     
 
-    // public TalonSRX climber = new TalonSRX(0);
-    // public TalonSRX cliberBalence= new TalonSRX(0);
+    public TalonSRX climber = new TalonSRX(0);
+    public TalonSRX cliberBalence= new TalonSRX(0);
     //find CAN id
 
     public DigitalInput uptakeLimit = new DigitalInput(0);
@@ -60,14 +54,14 @@ public class RobotMap {
     public DoubleSolenoid intakeArm = new DoubleSolenoid(49, 2, 3);
 
 
-     //public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
+     public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
 
     private RobotMap() {
         driveLeftFrontEncoder = driveLeftFront.getEncoder();
         driveLeftBackEncoder = driveLeftBack.getEncoder();
         driveRightFrontEncoder = driveRightFront.getEncoder();
         driveRightBackEncoder = driveRightBack.getEncoder();
-        //flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
+        flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
 
         driveLeft.setInverted(true);
         driveRight.setInverted(true);

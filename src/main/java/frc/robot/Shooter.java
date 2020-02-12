@@ -2,24 +2,19 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
 public class Shooter implements Updateable {
-    private BaseMotorController flywheel;
-    private BaseMotorController turret;
-    private BaseMotorController hood;
-    private BaseMotorController intake;
-    private BaseMotorController indexer;
-    private BaseMotorController uptake;
+    private static Shooter kInstance = null;
+
+    private BaseMotorController flywheel, turret, hood, intake, indexer, uptake;
 
     private DoubleSolenoid intakeArm;
 
-    private DigitalInput uptakeLimit;
-    private DigitalInput indexerRotationLimit;
+    private DigitalInput uptakeLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
 
     private InputManager inputManager;
@@ -36,31 +31,38 @@ public class Shooter implements Updateable {
     private boolean intakeFrwd = false;
     private boolean intakeRev = false;
 
-    // private int shootProgress = 1;
-    private int runUptake = 10;
-
     private int flywheelHold = 0;
-    private boolean opAhold = false;
+    private boolean driverAhold = false;
     private int indexerHold = 0;
-    private int shootHold = 0;
 
     private TurretState autoTurretState = TurretState.Holding;
 
-    public Shooter(RobotMap robotMap, InputManager inputManager, Vision vision) {
-        this.flywheel = robotMap.flywheel;
-        this.turret = robotMap.turret;
-        this.hood = robotMap.hood;
-        this.intake = robotMap.intake;
-        this.indexer = robotMap.indexer;
-        this.uptake = robotMap.uptake;
+    public Shooter() {
+        flywheel = Robot.robotMap.flywheel;
+        turret = Robot.robotMap.turret;
+        hood = Robot.robotMap.hood;
+        intake = Robot.robotMap.intake;
+        indexer = Robot.robotMap.indexer;
+        uptake = Robot.robotMap.uptake;
 
-        this.intakeArm = robotMap.intakeArm;
+        intakeArm = Robot.robotMap.intakeArm;
         
-        this.uptakeLimit = robotMap.uptakeLimit;
-        this.indexerRotationLimit = robotMap.indexerRotationLimit;
-        this.ballLimits = robotMap.ballLimit;
+        uptakeLimit = Robot.robotMap.uptakeLimit;
+        indexerRotationLimit = Robot.robotMap.indexerRotationLimit;
+        ballLimits = Robot.robotMap.ballLimit;
 
-        this.inputManager = inputManager;
+        inputManager = Robot.inputManager;
+    }
+
+    public static Shooter getInstance() {
+        if (kInstance == null) {
+            kInstance = new Shooter();
+        } 
+        return kInstance;
+    }
+
+    public void dashboard() {
+
     }
 
     public void handleInput() {
@@ -76,17 +78,17 @@ public class Shooter implements Updateable {
             flywheelHold = 0;
         }
         //Intake
-        if (inputManager.opA && !intakeFrwd && !opAhold) {
+        if (inputManager.driverA && !intakeFrwd && !driverAhold) {
             intakeFrwd = true;
-            opAhold = true;
-        } else if (inputManager.opA && intakeFrwd && !opAhold) {
+            driverAhold = true;
+        } else if (inputManager.driverA && intakeFrwd && !driverAhold) {
             intakeFrwd = false;
-            opAhold = true;
-        } else if (!inputManager.opA) {
-            opAhold = false;
+            driverAhold = true;
+        } else if (!inputManager.driverA) {
+            driverAhold = false;
         }
 
-        if (inputManager.opB) {
+        if (inputManager.driverB) {
             intakeRev = true;
         } else {
             intakeRev = false;
@@ -110,14 +112,16 @@ public class Shooter implements Updateable {
             hoodState = 0;
         }
 
-        // if (inputManager.opY && indexerHold == 0) {
-        //     isAdvancing = true;
-        //     indexerHold++;
-        // } else if (!inputManager.opY && shootState == 0) {
-        //     isAdvancing = false;
-        //     indexerHold = 0;
-        // }
+        //Manual Index
+        if (inputManager.opY && indexerHold == 0) {
+            isAdvancing = true;
+            indexerHold++;
+        } else if (!inputManager.opY && shootState == ShooterState.NotShooting) {
+            isAdvancing = false;
+            indexerHold = 0;
+        }
         
+        //shooter
         double triggerPressed = .85;
         if (inputManager.opRightTrigger > triggerPressed) {
             shooterOn = true;

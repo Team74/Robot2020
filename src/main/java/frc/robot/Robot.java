@@ -6,10 +6,6 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
-
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -33,13 +29,13 @@ public class Robot extends TimedRobot {
 
   ArrayList<Updateable> updateableObjects = new ArrayList<>();
 
-  RobotMap mRobotMap;
-  InputManager mInputManager;
+  static RobotMap robotMap;
+  static InputManager inputManager;
 
-  Drivebase drivebase;
-  Climber climber;
-  Shooter shooter;
-  Vision mVision;
+  static Drivebase drivebase;
+  static Climber climber;
+  static Shooter shooter;
+  static Vision mVision;
 
   @Override
   public void robotInit() {
@@ -47,16 +43,17 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    mRobotMap = RobotMap.getInstance();
-    mInputManager = InputManager.getInstance();
-    updateableObjects.add(mInputManager);
+    updateableObjects.add(inputManager);
+    
+    robotMap = RobotMap.getInstance();
+    inputManager = InputManager.getInstance();
 
-    drivebase = new Drivebase();
+    drivebase = Drivebase.getInstance();
     updateableObjects.add(drivebase);
-    climber = new Climber(mInputManager, mRobotMap);
+    climber = Climber.getInstance();
     updateableObjects.add(climber);
     mVision = Vision.getInstance();
-    shooter = new Shooter(mRobotMap, mInputManager, mVision);
+    shooter = Shooter.getInstance();
     updateableObjects.add(shooter);
   }
 
@@ -67,7 +64,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    mRobotMap.gearShift.set(Value.kForward);
+    robotMap.gearShift.set(Value.kForward);
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -86,7 +83,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    mRobotMap.gearShift.set(Value.kForward);
+    robotMap.gearShift.set(Value.kForward);
   }
 
 
@@ -94,21 +91,15 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     for(Updateable object : updateableObjects) {
       object.update(0.0);
+      object.dashboard();
     }
 
     shooter.handleInput();
     shooter.autoIndex();
-
-    // climber.handleInput();
-    // climber.update(); 
-
-    // mRobotMap.driveRightBack.set(1);
-    // mRobotMap.driveLeftBack.set(1);
-   
-    //Driver Controls
   }
 
   @Override
   public void testPeriodic() {
+
   }
 }
