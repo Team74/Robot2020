@@ -1,8 +1,11 @@
 package frc.robot;
 
+import java.util.HashMap;
+
+import javax.management.RuntimeErrorException;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
-import com.fasterxml.jackson.databind.JsonSerializable.Base;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 
@@ -19,7 +22,16 @@ public class Shooter {
     private DigitalInput[] ballLimits;
 
     private InputManager inputManager;
+    private Vision vision;
 
+    private HashMap<String, Double> highPort = new HashMap<>() {
+        private static final long serialVersionUID = -9999;
+        {
+            put("camera_angle", 1.0);
+            put("camera_height", 1.0);
+            put("target_height", 89.75);
+        }
+    };
     private Boolean flywheelOn = false;
     private int intakeState = 0;
     private int turretState = 0;
@@ -36,6 +48,9 @@ public class Shooter {
     private int indexerHold = 0;
     private int shootHold = 0;
 
+    private int maximumRotation = 891324;
+    private boolean hasHitLeft = false;
+
     private TurretState autoTurretState = TurretState.Holding;
 
     public Shooter(RobotMap robotMap, InputManager inputManager, Vision vision) {
@@ -46,6 +61,7 @@ public class Shooter {
         this.indexer = robotMap.indexer;
         this.uptake = robotMap.uptake;
         this.inputManager = inputManager;
+        this.vision = vision;
     }
 
     public void handleInput() {
@@ -221,16 +237,29 @@ public class Shooter {
 
     private void alignShooter() {
         autoTurretState = TurretState.Tracking;
-        //if ()
-        //If no target in screen
-            //Turn to left limit
-            //Check for target in screen periodically
-                //If no target found turn to right
-                //Check for target in screen periodically
-        //If a target is in view
-            //calculate where we need to go
-            //Go there
-        //Once locked onto target, set state to holding and signal that we are prepared to shoot
+        HashMap<String, Double> aimingData = VisionProcessing.calculateDistanceAngle(vision.getData(), highPort);
+        if (aimingData == null) {
+            System.out.println("No targets in view");
+            if (turret.getSelectedSensorPosition() != maximumRotation && !hasHitLeft) {
+                turret.set(ControlMode.MotionMagic, maximumRotation);
+                if (turret.getSelectedSensorPosition() == maximumRotation) {
+                    hasHitLeft = true;
+                }
+            } else {
+                turret.set(ControlMode.MotionMagic, -maximumRotation);
+                if (turret.getSelectedSensorPosition() == -maximumRotation) {
+                    System.out.println("ur dumb");
+                }
+            }
+        } else {
+            //handle hood
+            double turretAngle = turret.getSelectedSensorPosition();
+            double targetPose = turret.getSelectedSensorPosition() + (toEncoderTicks(aimingData.get("angle")) * -1);
+            turret.set(ControlMode.MotionMagic, targetPose);
+            if (turret.getSelectedSensorPosition() == targetPose) {
+                autoTurretState = TurretState.ReadyToShoot;
+            } 
+        }
         //Possible use angelo backups
         turret.set(ControlMode.PercentOutput, 0);
         System.out.println("align  shooter");

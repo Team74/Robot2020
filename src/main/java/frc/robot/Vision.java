@@ -43,7 +43,7 @@ public class Vision {
         String[] pairs = data.split(";");
         for(String i : pairs) {
             String[] pair = i.split(":");
-            processedData.put( pair[0], Integer.parseInt(pair[1]));
+            processedData.put(pair[0], Integer.parseInt(pair[1]));
         }
         return processedData;
     }
