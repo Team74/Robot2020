@@ -10,6 +10,9 @@ import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Shooter implements Updateable {
     private static Shooter kInstance = null;
@@ -53,6 +56,13 @@ public class Shooter implements Updateable {
 
     private TurretState autoTurretState = TurretState.Holding;
 
+    private NetworkTable limelight;
+    
+    private NetworkTableEntry tx;
+    private NetworkTableEntry ty;
+    private NetworkTableEntry ta;
+    private NetworkTableEntry tv;
+
     public Shooter() {
         flywheel = Robot.robotMap.flywheel;
         turret = Robot.robotMap.turret;
@@ -68,6 +78,8 @@ public class Shooter implements Updateable {
         ballLimits = Robot.robotMap.ballLimit;
 
         inputManager = Robot.inputManager;
+
+        limelight = Robot.robotMap.limelight;
     }
 
     public static Shooter getInstance() {
@@ -147,6 +159,11 @@ public class Shooter implements Updateable {
     }
 
     public void update(double dt) {
+        tx = limelight.getEntry("tx");
+        ty = limelight.getEntry("ty");
+        tv = limelight.getEntry("tv");
+        ta = limelight.getEntry("ta");
+
         if (flywheelOn) {
            flywheel.set(ControlMode.PercentOutput, 10);
         } else {

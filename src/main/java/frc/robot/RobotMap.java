@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class RobotMap {
@@ -58,7 +57,7 @@ public class RobotMap {
     public DoubleSolenoid intakeArm = new DoubleSolenoid(49, 2, 3);
 
     //Limelight network table
-    public NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
+    public NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
 
      public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
 
