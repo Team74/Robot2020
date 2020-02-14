@@ -11,6 +11,10 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class RobotMap {
     private static RobotMap kInstance = null;
@@ -28,10 +32,10 @@ public class RobotMap {
     public CANEncoder driveRightFrontEncoder;
     public CANEncoder driveRightBackEncoder;
 
-    public TalonSRX intake = new TalonSRX(18);         
+    public TalonSRX intake = new TalonSRX(0);         
     public VictorSPX flywheel = new VictorSPX(6);
     public VictorSPX test = new VictorSPX(6);
-    public TalonSRX turret = new TalonSRX(0);
+    public TalonSRX turret = new TalonSRX(18);
     public TalonSRX hood = new TalonSRX(0);  
     public TalonSRX indexer = new TalonSRX(1);
     public VictorSPX uptake = new VictorSPX(7); 
@@ -49,10 +53,12 @@ public class RobotMap {
                                         new DigitalInput(5), 
                                         new DigitalInput(6)};
 
-    public Compressor compressor = new Compressor(0);
+    // public Compressor compressor = new Compressor(0);
     public DoubleSolenoid gearShift = new DoubleSolenoid(49, 0, 1);
     public DoubleSolenoid intakeArm = new DoubleSolenoid(49, 2, 3);
 
+    //Limelight network table
+    public NetworkTable table = NetworkTableInstance.getDefault().getTable("limelight");
 
      public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
 

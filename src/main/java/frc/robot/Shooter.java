@@ -62,7 +62,7 @@ public class Shooter implements Updateable {
     }
 
     public void dashboard() {
-
+        
     }
 
     public void handleInput() {
@@ -139,13 +139,13 @@ public class Shooter implements Updateable {
 
         switch (turretState) {
             case -1:
-                turret.set(ControlMode.PercentOutput, 100);
+                turret.set(ControlMode.PercentOutput, 25);
                 break;
             case 0:
-               turret.set(ControlMode.PercentOutput, 0);
+                turret.set(ControlMode.PercentOutput, 0);
                 break;
             case 1:
-                turret.set(ControlMode.PercentOutput, -100);
+                turret.set(ControlMode.PercentOutput, -25);
                 break;
             case 2:
                 alignShooter();
@@ -154,13 +154,13 @@ public class Shooter implements Updateable {
 
         switch (hoodState) {
             case -1:
-                hood.set(ControlMode.PercentOutput, 100);
+                hood.set(ControlMode.PercentOutput, 25);
                 break;
             case 0:
                hood.set(ControlMode.PercentOutput, 0);
                 break;
             case 1:
-                hood.set(ControlMode.PercentOutput, -100);
+                hood.set(ControlMode.PercentOutput, -25);
                 break;
         }
 

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import jdk.internal.util.xml.impl.Input;
@@ -43,15 +44,15 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    updateableObjects.add(inputManager);
     
     robotMap = RobotMap.getInstance();
     inputManager = InputManager.getInstance();
+    updateableObjects.add(inputManager);
 
-    drivebase = Drivebase.getInstance();
-    updateableObjects.add(drivebase);
-    climber = Climber.getInstance();
-    updateableObjects.add(climber);
+    // drivebase = Drivebase.getInstance();
+    // updateableObjects.add(drivebase);
+    // climber = Climber.getInstance();
+    // updateableObjects.add(climber);
     mVision = Vision.getInstance();
     shooter = Shooter.getInstance();
     updateableObjects.add(shooter);
