@@ -10,6 +10,8 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
+import java.util.ArrayList;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -29,8 +31,12 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
+  ArrayList<Updateable> updateableObjects = new ArrayList<>();
+
   RobotMap mRobotMap;
   InputManager mInputManager;
+
+  Drivebase drivebase;
   Climber climber;
   Shooter shooter;
   Vision mVision;
@@ -43,10 +49,15 @@ public class Robot extends TimedRobot {
 
     mRobotMap = RobotMap.getInstance();
     mInputManager = InputManager.getInstance();
+    updateableObjects.add(mInputManager);
 
+    drivebase = new Drivebase();
+    updateableObjects.add(drivebase);
     climber = new Climber(mInputManager, mRobotMap);
+    updateableObjects.add(climber);
     mVision = Vision.getInstance();
-    // shooter = new Shooter(mRobotMap, mInputManager);
+    shooter = new Shooter(mRobotMap, mInputManager, mVision);
+    updateableObjects.add(shooter);
   }
 
   @Override
@@ -56,7 +67,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    //m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
+    mRobotMap.gearShift.set(Value.kForward);
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -73,15 +84,21 @@ public class Robot extends TimedRobot {
     }
   }
 
-
-  private int LThold = 0;
-  private int Lhold = 0;
-  private boolean wheelDeploy = false;
+  @Override
+  public void teleopInit() {
+    mRobotMap.gearShift.set(Value.kForward);
+  }
 
 
   @Override
   public void teleopPeriodic() {
-    mInputManager.update(0);
+    for(Updateable object : updateableObjects) {
+      object.update(0.0);
+    }
+
+    shooter.handleInput();
+    shooter.autoIndex();
+
     // climber.handleInput();
     // climber.update(); 
 
@@ -89,78 +106,6 @@ public class Robot extends TimedRobot {
     // mRobotMap.driveLeftBack.set(1);
    
     //Driver Controls
-    // mRobotMap.drive.arcadeDrive(mInputManager.driverLeftStickY, mInputManager.driverRightStickX);
- /*
-    if (mInputManager.driverPOV == 0) {
-      System.out.println("Climber Extend");
-    } else if (mInputManager.driverPOV == 90) {
-      System.out.println("Climber Right");
-    } else if (mInputManager.driverPOV == 180) {
-      System.out.println("Climber Retract");
-    } else if (mInputManager.driverPOV == 270) {
-      System.out.println("Climber Left");
-    }
-
-    //Operator Controls
-
-    if (mInputManager.opLeftStickX > .5) {
-      System.out.println("Wheel Spin Right");
-    } else if (mInputManager.opLeftStickX < -.5) {
-      System.out.println("Wheel Spin Left");
-    }
-
-    if (mInputManager.opPOV == 0) {
-      System.out.println("Hood Up");
-    } else if (mInputManager.opPOV == 90) {
-      System.out.println("Shooter Turn Right");
-    } else if (mInputManager.opPOV == 180) {
-      System.out.println("Hood Down");
-    } else if (mInputManager.opPOV == 270) {
-      System.out.println("Shooter Turn Left");
-    }
-
-    if (mInputManager.opA && !mInputManager.opB) {
-      System.out.println("Intake Balls");
-    } else if (!mInputManager.opA && mInputManager.opB) {
-      System.out.println("Rev. Intake Balls");
-    }
-
-    
-    if (mInputManager.opY) {
-      System.out.println("Advance Indexer");
-    }
-
-    int holdTime = 16;
-    double triggerIsPressed = .85;
-    if (mInputManager.opRightTrigger > triggerIsPressed) {
-      LThold++;
-      if (LThold > holdTime) {
-        System.out.println("Fire all Balls");
-      }
-    } else {
-      if (LThold > 0 && LThold < holdTime) {
-        System.out.println("Fire one Ball");
-      }
-      LThold = 0;
-    }
-
-    if (mInputManager.opLeftTrigger > triggerIsPressed) {
-      System.out.println("Auto Aim");
-    }
-
-    if (mInputManager.opLeftBumper) {
-      if (wheelDeploy && Lhold == 0) {
-        System.out.println("Retract Wheel");
-        wheelDeploy = false;
-      } else if (Lhold == 0) {
-        System.out.println("Deploy Wheel");
-        wheelDeploy = true;
-      }
-      Lhold++;
-    } else {
-      Lhold = 0;
-    }
-    */
   }
 
   @Override

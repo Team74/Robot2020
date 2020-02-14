@@ -8,14 +8,18 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 
-public class Shooter {
+public class Shooter implements Updateable {
     private BaseMotorController flywheel;
     private BaseMotorController turret;
     private BaseMotorController hood;
     private BaseMotorController intake;
     private BaseMotorController indexer;
     private BaseMotorController uptake;
+
+    private DoubleSolenoid intakeArm;
 
     private DigitalInput uptakeLimit;
     private DigitalInput indexerRotationLimit;
@@ -33,18 +37,22 @@ public class Shooter {
         }
     };
     private Boolean flywheelOn = false;
-    private int intakeState = 0;
+    private IntakeState intakeState = IntakeState.IntakeUp;
     private int turretState = 0;
     private int hoodState = 0;
     private boolean isAdvancing = false;
-    private int shootState = 0;
-    private int indexerState = 0;
+    private ShooterState shootState = ShooterState.NotShooting;
+    private Boolean shooterOn = false;
+    private IndexerState indexerState = IndexerState.NoBalls;
 
-    private int shootProgress = 1;
+    private boolean intakeFrwd = false;
+    private boolean intakeRev = false;
+
+    // private int shootProgress = 1;
     private int runUptake = 10;
 
     private int flywheelHold = 0;
-    private int intakeHold = 0;
+    private boolean opAhold = false;
     private int indexerHold = 0;
     private int shootHold = 0;
 
@@ -60,6 +68,13 @@ public class Shooter {
         this.intake = robotMap.intake;
         this.indexer = robotMap.indexer;
         this.uptake = robotMap.uptake;
+
+        this.intakeArm = robotMap.intakeArm;
+        
+        this.uptakeLimit = robotMap.uptakeLimit;
+        this.indexerRotationLimit = robotMap.indexerRotationLimit;
+        this.ballLimits = robotMap.ballLimit;
+
         this.inputManager = inputManager;
         this.vision = vision;
     }
@@ -77,16 +92,20 @@ public class Shooter {
             flywheelHold = 0;
         }
         //Intake
-        if (inputManager.opA || inputManager.opB) {
-            if (inputManager.opA && !inputManager.opB && intakeHold == 0) {
-                intakeState = 1;
-            } else if (!inputManager.opA && inputManager.opB && intakeHold == 0) {
-                intakeState = -1;
-            }
-            intakeHold++;
+        if (inputManager.opA && !intakeFrwd && !opAhold) {
+            intakeFrwd = true;
+            opAhold = true;
+        } else if (inputManager.opA && intakeFrwd && !opAhold) {
+            intakeFrwd = false;
+            opAhold = true;
+        } else if (!inputManager.opA) {
+            opAhold = false;
+        }
+
+        if (inputManager.opB) {
+            intakeRev = true;
         } else {
-            intakeState = 0;
-            intakeHold = 0;
+            intakeRev = false;
         }
         //Turret & hood
         if (inputManager.opPOV != -1 && inputManager.opLeftTrigger < .85) {
@@ -107,55 +126,27 @@ public class Shooter {
             hoodState = 0;
         }
 
-        if (inputManager.opY && indexerHold == 0) {
-            isAdvancing = true;
-            indexerHold++;
-        } else if (!inputManager.opY && shootState == 0) {
-            isAdvancing = false;
-            indexerHold = 0;
-        }
-
-        //shooter
-        int holdTime = 16;
-        double triggerIsPressed = .85;
-        if (inputManager.opRightTrigger > triggerIsPressed) {
-          shootHold++;
-          shootState = 0;
-          if (shootHold > holdTime) {
-            System.out.println("Fire all Balls");
-            shootState = 2;
-          }
+        // if (inputManager.opY && indexerHold == 0) {
+        //     isAdvancing = true;
+        //     indexerHold++;
+        // } else if (!inputManager.opY && shootState == 0) {
+        //     isAdvancing = false;
+        //     indexerHold = 0;
+        // }
+        
+        double triggerPressed = .85;
+        if (inputManager.opRightTrigger > triggerPressed) {
+            shooterOn = true;
         } else {
-          if (shootHold > 0 && shootHold < holdTime) {
-            System.out.println("Fire one Ball");
-            shootState = 1;
-          } else if (shootHold > 0 && shootHold > holdTime) {
-            System.out.println("Stopping Multifire");
-            shootState = 0;
-          }
-          shootHold = 0;
+            shooterOn = false;
         }
     }
 
-    public void update() {
-        System.out.println("shoot State " + shootState);
-        System.out.println("shoot progress " + shootProgress);
+    public void update(double dt) {
         if (flywheelOn) {
            flywheel.set(ControlMode.PercentOutput, 10);
         } else {
            flywheel.set(ControlMode.PercentOutput, 0);
-        }
-
-        switch (intakeState) {
-            case -1:
-                intake.set(ControlMode.PercentOutput, 100);
-                break;
-            case 0:
-                intake.set(ControlMode.PercentOutput, 0);
-                break;
-            case 1:
-                intake.set(ControlMode.PercentOutput, -100);
-                break;
         }
 
         switch (turretState) {
@@ -187,44 +178,158 @@ public class Shooter {
 
         if (isAdvancing) {
             indexer.set(ControlMode.PercentOutput, 20);
-            isAdvancing = !hasAdvanced();
+            isAdvancing = hasAdvanced();
         } else {
             indexer.set(ControlMode.PercentOutput, 0);
         }
+        intake();
+        shoot();
+    }
 
-        if (shootState > 0) {
-            startShooting();
-            if (shootProgress == 1) {
-                if (hasPrepedBall()) {
-                    shootProgress++;
-                } else {
-                    isAdvancing = true;
+    public void intake() {
+        System.out.println(intakeState);
+        switch (intakeState) {
+            //Make sure that the intake is up, and off.
+            case IntakeUp:
+                intakeArm.set(Value.kReverse);
+                intake.set(ControlMode.PercentOutput, 0);
+
+                if (intakeFrwd) {
+                    intakeState = IntakeState.IntakeDown;
                 }
-            } 
-            if (shootProgress == 2) {
-                if (runUptake != 0) {
-                  uptake.set(ControlMode.PercentOutput, 45);
-                  runUptake--;
-                } else {
-                  uptake.set(ControlMode.PercentOutput, 0);
-                  runUptake = 10;
-                  shootProgress = 1;
-                  if (shootState == 1) {
-                      shootState = 0;
-                  }
+                break;
+            //deploy the intake
+            case IntakeDown:
+                intakeArm.set(Value.kForward);
+                intake.set(ControlMode.PercentOutput, 100);
+
+                if (indexerFull() && !intakeFrwd) {
+                    intakeState = IntakeState.IntakeUp;
+                } else if (intakeRev) {
+                    intakeState = IntakeState.IntakeDownRev;
                 }
-            }
-        } else {
-            uptake.set(ControlMode.PercentOutput, 0);
+                break;
+            //reverse the intake, once it is deployed
+            case IntakeDownRev:
+                intake.set(ControlMode.PercentOutput, -100);
+                 
+                if (!intakeFrwd) {
+                    intakeState = IntakeState.IntakeUp;
+                } else if (!intakeRev) {
+                    intakeState = IntakeState.IntakeDown;
+                }
+                break;
+            case Indexing: //Unknown if this is needed
+                break;
+        }
+    }
+
+    public void shoot() {
+        switch (shootState) {
+            case NotShooting:
+                if (shooterOn && flywheelUpToSpeed()) {
+                    shootState = ShooterState.ShootBall;
+                } else if (shooterOn && !flywheelUpToSpeed()) {
+                    shootState = ShooterState.FlywheelOn;
+                }
+                break;
+            case ShootBall:
+                if (!shooterOn) {
+                    shootState = ShooterState.NotShooting;
+                    break;
+                }
+                uptake.set(ControlMode.PercentOutput, 100);
+                if (indexerHasBalls()) {
+                    shootState = ShooterState.LoadBall;
+                } else if (!indexerHasBalls()) {
+                    shootState = ShooterState.FlywheelOff;
+                }
+                break;
+            case LoadBall:
+                if (uptakeLimit.get()) {
+                    shootState = ShooterState.ShootBall;
+                }
+                break;
+            case FlywheelOn:
+                flywheel.set(ControlMode.PercentOutput, 100);
+                if (flywheelUpToSpeed()) {
+                    shootState = ShooterState.ShootBall;
+                }
+                break;
+            case FlywheelOff:
+                flywheel.set(ControlMode.PercentOutput, 0);
+                shootState = ShooterState.NotShooting;
+                break;
         }
     }
 
     public void autoIndex() {
-
+        switch (indexerState) {
+            //checks for the first ball intook
+            case NoBalls:
+                if(ballLimits[0].get() == true && intakeState == IntakeState.IntakeDown) {
+                    indexerState = IndexerState.Rotate;
+                }
+                break;
+            //rotates the indexer
+            case Rotate:
+                isAdvancing = true;
+                if (hasAdvanced()) {
+                    indexerState = IndexerState.StopRotating;
+                    isAdvancing = false;
+                }
+                break;
+            //stops rotating
+            case StopRotating: 
+                //no places left and uptake ready
+                if (indexerFull() && hasPrepedBall()) {
+                    indexerState = IndexerState.StopRotating;
+                    break;
+                }
+                //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
+                if ((!indexerFull() && ballLimits[0].get()) || (intakeState != IntakeState.IntakeDown && !ballLimits[3].get())) {
+                    indexerState = IndexerState.Rotate;
+                    break;
+                }
+                //ball in uptake pos and uptake empty
+                if (!hasPrepedBall() && ballLimits[3].get()) {
+                    indexerState = IndexerState.UptakeBall;
+                    break;
+                }
+                break;
+            //uptakes a ball
+            case UptakeBall:
+                uptake.set(ControlMode.PercentOutput, 100);
+                if (hasPrepedBall()) {
+                    indexerState = IndexerState.StopUptake;
+                }
+                break;
+            //stops the uptake
+            case StopUptake:
+                if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
+                    indexerState = IndexerState.Rotate;
+                } else {
+                    indexerState = IndexerState.NoBalls;
+                }
+                
+                break;
+        }
     }
 
-    private void startShooting() {
-        flywheelOn = true;
+    private boolean indexerFull() {
+        if (ballLimits[0].get() && ballLimits[1].get() && ballLimits[2].get() && ballLimits[3].get()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean indexerHasBalls() {
+        if (ballLimits[0].get() || ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get() || ballLimits[4].get()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private boolean hasAdvanced() {
@@ -233,6 +338,10 @@ public class Shooter {
 
     private boolean hasPrepedBall() {
         return !uptakeLimit.get();
+    }
+
+    private boolean flywheelUpToSpeed() {
+        return true;
     }
 
     private void alignShooter() {
@@ -278,5 +387,20 @@ public class Shooter {
         StopRotating,
         UptakeBall,
         StopUptake;
+    }
+
+    public enum IntakeState {
+        IntakeUp,
+        IntakeDown,
+        IntakeDownRev,
+        Indexing; //We dont know if this will be needed, not currently called
+    }
+
+    public enum ShooterState {
+        NotShooting,
+        FlywheelOn,
+        FlywheelOff,
+        ShootBall,
+        LoadBall;
     }
 }

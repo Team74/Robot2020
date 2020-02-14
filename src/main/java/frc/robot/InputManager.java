@@ -30,6 +30,12 @@ public class InputManager implements Updateable {
     public static boolean driverX = false;
     public static boolean driverY = false;
 
+    public boolean driverLeftBumper = false;
+    public boolean driverRightBumper = false;
+
+    public double driverTriggerLeft = 0;
+    public double driverTriggerRight = 0;
+
     public int driverPOV = -1;
 
     //operator buttons
@@ -56,10 +62,6 @@ public class InputManager implements Updateable {
         return kInstance;
     }
 
-    private InputManager() {
-        
-    }
-
     public void update(double dt) {
         driverLeftStickY = mController0.getY(Hand.kLeft);
         driverLeftStickX = mController0.getX(Hand.kLeft);
@@ -70,6 +72,12 @@ public class InputManager implements Updateable {
         driverB = mController0.getBButton();
         driverX = mController0.getXButton();
         driverY = mController0.getYButton();
+
+        driverTriggerLeft = mController0.getTriggerAxis(Hand.kLeft);
+        driverTriggerRight = mController0.getTriggerAxis(Hand.kRight);
+
+        driverLeftBumper = mController0.getBumper(Hand.kLeft);
+        driverRightBumper = mController0.getBumper(Hand.kRight);
         
         driverPOV = mController0.getPOV();
 
