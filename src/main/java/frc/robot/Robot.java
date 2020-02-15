@@ -65,7 +65,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autoSelected = m_chooser.getSelected();
-    robotMap.gearShift.set(Value.kForward);
+    // robotMap.gearShift.set(Value.kForward);
     System.out.println("Auto selected: " + m_autoSelected);
   }
 
@@ -84,7 +84,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    robotMap.gearShift.set(Value.kForward);
+    // robotMap.gearShift.set(Value.kForward);
   }
 
 

@@ -26,7 +26,7 @@ public class Drivebase implements Updateable {
         inputManager = Robot.inputManager;
         robotMap = RobotMap.getInstance();
         leftMotor = robotMap.driveLeft; 
-        rightMotor = robotMap.driveRight;
+        // rightMotor = robotMap.driveRight;
 
         differentialDrive = new DifferentialDrive(leftMotor, rightMotor);
     }
@@ -55,13 +55,13 @@ public class Drivebase implements Updateable {
     public void handleShift(ShiftState newState) {
         switch(newState) {
             case High:
-                robotMap.gearShift.set(Value.kForward);
+                // robotMap.gearShift.set(Value.kForward);
                 break;
             case Low:
-                robotMap.gearShift.set(Value.kReverse);
+                // robotMap.gearShift.set(Value.kReverse);
                 break;
             default:
-                robotMap.gearShift.set(Value.kReverse);
+                // robotMap.gearShift.set(Value.kReverse);
                 break;
         }
     }
