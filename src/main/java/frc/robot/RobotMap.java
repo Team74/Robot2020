@@ -78,11 +78,6 @@ public class RobotMap {
         // driveRightFrontEncoder = driveRightFront.getEncoder();
         driveRightBackEncoder = driveRightBack.getEncoder();
 
-
-
-        hood.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
-        hood.setInverted(true);
-
         driveLeft.setInverted(true);
         // driveRight.setInverted(true);
 

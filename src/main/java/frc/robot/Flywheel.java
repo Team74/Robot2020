@@ -5,7 +5,6 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import frc.robot.RobotMap;
-import frc.lib.motorcontroller.TalonSRXBuilder;
 import frc.robot.Constants;
 
 public class Flywheel implements Updateable {
@@ -22,7 +21,6 @@ public class Flywheel implements Updateable {
     private RobotMap map;
 
     private TalonSRX flywheel;
-    private double outputValue = 0.0;
 
     private FlywheelState state;
     private FlywheelControlState controlState;
@@ -35,8 +33,9 @@ public class Flywheel implements Updateable {
         flywheel.setInverted(false);
         flywheel.setSensorPhase(true);
         flywheel.configNominalOutputForward(0);
-        flywheel.configNominalOutputReverse(0);
         flywheel.configPeakOutputForward(100);
+        //Flywheel should never move in revearse
+        flywheel.configNominalOutputReverse(0);
         flywheel.configPeakOutputReverse(0);
 
         flywheel.config_kF(0, Constants.kFlywheelF, Constants.kTimeoutMs);
@@ -46,6 +45,32 @@ public class Flywheel implements Updateable {
     }
 
     public void update(double dt) {
+        switch(state) {
+            case PercentOutput:
+                break;
+            case VelocityPID:
+                break;
+            case PositionPID:
+                break;
+            case MotionMagic:
+                break;
+            default:
+                System.out.println("Hit default in flywheel.update() Stopping flywheel");
+                setControlState(FlywheelControlState.PercentOutput);
+                set(0.0);
+                break;
+        }
+    }
+
+    public void dashboard() {
+        
+    }
+
+    /**
+     * Sets the motor controller, param units vary depending on the value of controlState
+     * @param outputValue Value to pass to the motor controller
+     */
+    public void set(double outputValue) {
         switch(controlState) {
             case PercentOutput:
                 flywheel.set(ControlMode.PercentOutput, outputValue);
@@ -60,21 +85,10 @@ public class Flywheel implements Updateable {
                 flywheel.set(ControlMode.MotionMagic, Math.round(outputValue));
                 break;
             default:
-                flywheel.stopMotor();
+                System.out.println("Hit default in flywheel.update() Stopping flywheel");
+                flywheel.set(ControlMode.PercentOutput, 0.0);
                 break;
         }
-    }
-
-    public void dashboard() {
-        
-    }
-
-    /**
-     * Sets the motor controller, param units vary depending on the value of controlState
-     * @param outputValue Value to pass to the motor controller
-     */
-    public void set(double outputValue) {
-
     }
 
     public void setState(FlywheelState newState) {

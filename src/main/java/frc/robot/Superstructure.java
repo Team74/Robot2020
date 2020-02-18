@@ -19,8 +19,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class Superstructure implements Updateable {
     private static Superstructure kInstance = null;
 
-    private BaseMotorController flywheel, hood, intake, indexer, uptake;
-    private TalonSRX turret;
+    private Hood hood;
+    private Indexer indexer;
+    private Flywheel flywheel;
+    private Intake intake;
+    private Turret turret;
 
     private DigitalInput hoodLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
@@ -73,12 +76,11 @@ public class Superstructure implements Updateable {
     private double validTargets;
 
     public Superstructure() {
-        flywheel = Robot.robotMap.flywheel;
-        turret = Robot.robotMap.turret;
-        hood = Robot.robotMap.hood;
-        intake = Robot.robotMap.intake;
-        indexer = Robot.robotMap.indexer;
-        uptake = Robot.robotMap.uptake;
+        flywheel = Flywheel.getInstance();
+        turret = Turret.getInstance();
+        hood = Hood.getInstance();
+        intake = Intake.getInstance();
+        indexer = Indexer.getInstance();
         
         hoodLimit = Robot.robotMap.hoodLimit;
         indexerRotationLimit = Robot.robotMap.indexerRotationLimit;
