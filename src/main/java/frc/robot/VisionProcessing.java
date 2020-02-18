@@ -5,12 +5,12 @@ import java.util.HashMap;
 public class VisionProcessing {
 
 
-    private static int limelightHorizontalFieldoView = 60;
-    private static int limelightVerticalFieldoView = 40;
-    private static int resolutionHorizontal = 1296;
-    private static int resolutionVertical = 976;
-    private static double viewPlaneWidth = 2.0 * Math.tan(limelightHorizontalFieldoView / 2);
-    private static double viewPlaneHeight = 2.0 * Math.tan(limelightVerticalFieldoView / 2);
+    private static final int limelightHorizontalFieldoView = 54;
+    private static final int limelightVerticalFieldoView = 41;
+    private static final int resolutionHorizontal = 340;
+    private static final int resolutionVertical = 240;
+    private static final double viewPlaneWidth = 2.0 * Math.tan(limelightHorizontalFieldoView / 2);
+    private static final double viewPlaneHeight = 2.0 * Math.tan(limelightVerticalFieldoView / 2);
 
 
 

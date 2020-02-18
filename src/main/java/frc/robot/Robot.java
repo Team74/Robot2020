@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
 
   static Drivebase drivebase;
   static Climber climber;
-  static Shooter shooter;
+  static Superstructure shooter;
   static Vision mVision;
 
   @Override
@@ -54,7 +54,7 @@ public class Robot extends TimedRobot {
     // climber = Climber.getInstance();
     // updateableObjects.add(climber);
     mVision = Vision.getInstance();
-    shooter = Shooter.getInstance();
+    shooter = Superstructure.getInstance();
     updateableObjects.add(shooter);
   }
 

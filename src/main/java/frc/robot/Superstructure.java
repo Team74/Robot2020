@@ -16,8 +16,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
-public class Shooter implements Updateable {
-    private static Shooter kInstance = null;
+public class Superstructure implements Updateable {
+    private static Superstructure kInstance = null;
 
     private BaseMotorController flywheel, hood, intake, indexer, uptake;
     private TalonSRX turret;
@@ -72,7 +72,7 @@ public class Shooter implements Updateable {
     //0 no valid targets, 1 valid target
     private double validTargets;
 
-    public Shooter() {
+    public Superstructure() {
         flywheel = Robot.robotMap.flywheel;
         turret = Robot.robotMap.turret;
         hood = Robot.robotMap.hood;
@@ -94,9 +94,9 @@ public class Shooter implements Updateable {
         tv = limelight.getEntry("tv");
     }
 
-    public static Shooter getInstance() {
+    public static Superstructure getInstance() {
         if (kInstance == null) {
-            kInstance = new Shooter();
+            kInstance = new Superstructure();
         } 
         return kInstance;
     }
