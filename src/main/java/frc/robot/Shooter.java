@@ -22,7 +22,7 @@ public class Shooter implements Updateable {
     private BaseMotorController flywheel, hood, intake, indexer, uptake;
     private TalonSRX turret;
 
-    private DigitalInput hoodLimit, indexerRotationLimit;
+    private DigitalInput hoodLimit, turretLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
 
     private InputManager inputManager;
@@ -38,7 +38,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private int turretState = 0;
+    private int turretState = 3;
     private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
@@ -81,6 +81,7 @@ public class Shooter implements Updateable {
         uptake = Robot.robotMap.uptake;
         
         hoodLimit = Robot.robotMap.hoodLimit;
+        turretLimit = Robot.robotMap.turretLimit;
         indexerRotationLimit = Robot.robotMap.indexerRotationLimit;
         ballLimits = Robot.robotMap.ballLimit;
 
@@ -197,6 +198,9 @@ public class Shooter implements Updateable {
                 break;
             case 2:
                 alignShooter();
+                break;
+            case 3:
+                zeroTurret();
                 break;
         }
 
@@ -446,10 +450,17 @@ public class Shooter implements Updateable {
     private void zeroHood() {
         if (!hoodLimit.get()) {
             hoodControlState = HoodControlState.PercentOutput;
-            setHood(-0.1);
         } else {
             hood.setSelectedSensorPosition(0);
             hoodState = HoodState.Holding;
+        }
+    }
+
+    private void zeroTurret() {
+        if (!turretLimit.get()) {
+            turret.set(ControlMode.PercentOutput, -0.1);
+        } else {
+            turretState = 0;
         }
     }
 
@@ -493,7 +504,8 @@ public class Shooter implements Updateable {
         Tracking,
         Holding,
         ReadyToShoot,
-        Manual;
+        Manual,
+        Zeroing;
     }
 
     public enum HoodState {
