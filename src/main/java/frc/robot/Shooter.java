@@ -155,7 +155,9 @@ public class Shooter implements Updateable {
             turretState = 2;
             hoodState = HoodState.Automatic;
         } else {
-            turretState = 0;
+            if (turretState != 3) {
+                turretState = 0;
+            }
             if (hoodState != HoodState.Zeroing) {
                 hoodState = HoodState.Holding;
             }
@@ -180,6 +182,7 @@ public class Shooter implements Updateable {
     }
 
     public void update(double dt) {
+        System.out.println("Turret Encoder " + turret.getSelectedSensorPosition());
         if (flywheelOn) {
             setFlywheel(14000);
         } else {
@@ -473,8 +476,10 @@ public class Shooter implements Updateable {
 
     private void zeroTurret() {
         if (!turretLimit.get()) {
-            turret.set(ControlMode.PercentOutput, -0.1);
+            turret.set(ControlMode.PercentOutput, 0.1);
         } else {
+            turret.set(ControlMode.PercentOutput, 0);
+            turret.setSelectedSensorPosition(0);
             turretState = 0;
         }
     }
