@@ -205,9 +205,10 @@ public class Shooter implements Updateable {
         }
 
         System.out.println("Hood position " + hood.getSelectedSensorPosition(0));
-        System.out.println("Hood Velcity " + hood.getSelectedSensorVelocity(0)); 
-        System.out.println("Hood Closed Loop Error " + hood.getClosedLoopError(0));       
-        System.out.println(hoodLimit.get());
+        System.out.println("Target Angle Vertical " + targetAngleVertical);
+        // System.out.println("Hood Velcity " + hood.getSelectedSensorVelocity(0)); 
+        // System.out.println("Hood Closed Loop Error " + hood.getClosedLoopError(0));       
+        // System.out.println(hoodLimit.get());
         switch (hoodState) {
             case Raising:
                 // System.out.println("Hood up");
@@ -226,6 +227,9 @@ public class Shooter implements Updateable {
             case Zeroing:
                 // System.out.println("Zeroing hood");
                 zeroHood();
+            case Automatic:
+                hoodControlState = HoodControlState.MotionMagic;
+                alignHood();
             default:
                 break;
         }
@@ -489,7 +493,6 @@ public class Shooter implements Updateable {
             }
             
         } */else {
-            //handle hood
             //double turretAngle = turret.getSelectedSensorPosition();
             if (targetAngleHorizontal > 0.0 - targetDeadband) {
                 //spin one way
@@ -500,7 +503,17 @@ public class Shooter implements Updateable {
             } else 
                 turret.set(ControlMode.PercentOutput, 0.0);
             }
+    }
+
+    private void alignHood() {
+        double hoodPositionTicks = (-1250 * targetAngleVertical) + 12500;
+        if (hoodPositionTicks < 0) {
+            hoodPositionTicks = 0;
+        } else if (hoodPositionTicks > 25000) {
+            hoodPositionTicks = 25000;
         }
+        setHood(hoodPositionTicks);
+    }
 
     
     public enum TurretState {
