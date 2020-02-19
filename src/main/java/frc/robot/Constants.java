@@ -17,6 +17,9 @@ public class Constants {
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 
+
+    public static final long kTurretMinimumRotation = -100000000;
+    public static final long kTurretMaxRotation = 10000000;
     public static final int kTurretMaxVelocity = 0;
     public static final int kTurretMaxAcceleration = 0;
     public static final double kTurretF = 0.0;

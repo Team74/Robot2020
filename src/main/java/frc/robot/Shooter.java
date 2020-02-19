@@ -38,7 +38,6 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private int turretState = 0;
     private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
@@ -59,7 +58,7 @@ public class Shooter implements Updateable {
     private boolean hasHitLeft = false;
     private double targetDeadband = 0.5;
 
-    private TurretState autoTurretState = TurretState.Holding;
+    private TurretState turretState = TurretState.Holding;
 
     private NetworkTable limelight;
     private NetworkTableEntry tx, ty, ta, tv;
@@ -145,18 +144,18 @@ public class Shooter implements Updateable {
             if(inputManager.opPOV == 0) {
                 hoodState = HoodState.Raising;
             } else if (inputManager.opPOV == 90) {
-                turretState = -1;
+                turretState = TurretState.RightSpin;
             } else if (inputManager.opPOV == 180) {
                 hoodState = HoodState.Lowering;
             } else if (inputManager.opPOV == 270) {
-                turretState = 1;
+                turretState = TurretState.LeftSpin;
             }
         } else if (inputManager.opLeftTrigger > .85) {
             // turretState = 2;
-            hoodState = HoodState.Automatic;
+            hoodState = HoodState.Tracking;
         } else {
-            if (turretState != 3) {
-                turretState = 0;
+            if (turretState != TurretState.Zeroing) {
+                turretState = TurretState.Holding;
             }
             if (hoodState != HoodState.Zeroing) {
                 hoodState = HoodState.Holding;
@@ -190,30 +189,30 @@ public class Shooter implements Updateable {
             setFlywheel(0);
         }
 
-        // System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
+        System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
         // System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
         switch (turretState) {
-            case -1:
-                turret.set(ControlMode.PercentOutput, .25);
-                break;
-            case 0:
-                turret.set(ControlMode.PercentOutput, 0);
-                break;
-            case 1:
+            case RightSpin:
                 turret.set(ControlMode.PercentOutput, -.25);
                 break;
-            case 2:
-                alignShooter();
+            case Holding:
+                turret.set(ControlMode.PercentOutput, 0);
                 break;
-            case 3:
+            case LeftSpin:
+                turret.set(ControlMode.PercentOutput, .25);
+                break;
+            case Tracking:
+                alignTurret();
+                break;
+            case Zeroing:
                 zeroTurret();
                 break;
             default:
                 break;
         }
 
-        System.out.println("Hood position " + hood.getSelectedSensorPosition(0));
-        System.out.println("Target Angle Vertical " + targetAngleVertical);
+        // System.out.println("Hood position " + hood.getSelectedSensorPosition(0));
+        // System.out.println("Target Angle Vertical " + targetAngleVertical);
         // System.out.println("Hood Velcity " + hood.getSelectedSensorVelocity(0)); 
         // System.out.println("Hood Closed Loop Error " + hood.getClosedLoopError(0));       
         // System.out.println(hoodLimit.get());
@@ -236,7 +235,7 @@ public class Shooter implements Updateable {
                 // System.out.println("Zeroing hood");
                 zeroHood();
                 break;
-            case Automatic:
+            case Tracking:
                 hoodControlState = HoodControlState.MotionMagic;
                 alignHood();
                 break;
@@ -405,10 +404,10 @@ public class Shooter implements Updateable {
                 hood.set(ControlMode.PercentOutput, value);
                 break;
             case MotionMagic:
-                hood.set(ControlMode.MotionMagic, value);
+                hood.set(ControlMode.MotionMagic, (int)value);
                 break;
             case PositionPID:
-                hood.set(ControlMode.Position, value);
+                hood.set(ControlMode.Position, (int)value);
                 break;
             default:
                 System.out.println("Using default case for hood set");
@@ -425,17 +424,21 @@ public class Shooter implements Updateable {
         hoodControlState = newState;
     }
 
+    private void setTurret(double value) {
+
+    }
+
     private void setFlywheel(double value) {
         switch(shooterControlState) {
             case PercentOutput:
                 flywheel.set(ControlMode.PercentOutput, value);
                 break;
             case VelocityPID:
-                flywheel.set(ControlMode.Velocity, value);
+                flywheel.set(ControlMode.Velocity, (int)value);
                 break;
             default:
                 System.out.println("Using default case for flywheel set");
-                flywheel.set(ControlMode.PercentOutput, value);
+                flywheel.set(ControlMode.PercentOutput, (int)value);
                 break;
         }
     }
@@ -488,31 +491,31 @@ public class Shooter implements Updateable {
         } else {
             turret.set(ControlMode.PercentOutput, 0);
             turret.setSelectedSensorPosition(0);
-            turretState = 0;
+            turretState = TurretState.Holding;
         }
     }
 
-    private void alignShooter() {
-        autoTurretState = TurretState.Tracking;
+    private void alignTurret() {
+        turretState = TurretState.Tracking;
         if ((validTargets == 0 || validTargets == Double.POSITIVE_INFINITY) || targetAngleHorizontal == Double.POSITIVE_INFINITY) {
             System.out.println("Error Align Shooter, Either no targets or recieving default value");
         }
-        /*
+        
         if (validTargets == 0) {
             System.out.println("No targets in view");
-            if (turret.getSelectedSensorPosition() != maximumRotation && !hasHitLeft) {
-                turret.set(ControlMode.MotionMagic, maximumRotation);
-                if (turret.getSelectedSensorPosition() == maximumRotation) {
+            if (turret.getSelectedSensorPosition() != Constants.kTurretMaxRotation && !hasHitLeft) {
+                turret.set(ControlMode.MotionMagic, Constants.kTurretMaxRotation);
+                if (turret.getSelectedSensorPosition() == Constants.kTurretMaxRotation) {
                     hasHitLeft = true;
                 }
             } else {
-                turret.set(ControlMode.MotionMagic, -maximumRotation);
-                if (turret.getSelectedSensorPosition() == -maximumRotation) {
+                turret.set(ControlMode.MotionMagic, Constants.kTurretMinimumRotation);
+                if (turret.getSelectedSensorPosition() == Constants.kTurretMinimumRotation) {
                     System.out.println("ur dumb");
                 }
             }
             
-        } */else {
+        } else {
             //double turretAngle = turret.getSelectedSensorPosition();
             if (targetAngleHorizontal > 0.0 - targetDeadband) {
                 //spin one way
@@ -527,10 +530,10 @@ public class Shooter implements Updateable {
 
     private void alignHood() {
         double hoodPositionTicks = (-1250 * targetAngleVertical) + 12500;
-        if (hoodPositionTicks < 0) {
-            hoodPositionTicks = 0;
-        } else if (hoodPositionTicks > 25000) {
-            hoodPositionTicks = 25000;
+        if (hoodPositionTicks < Constants.kHoodMinimumHeight) {
+            hoodPositionTicks = Constants.kHoodMinimumHeight;
+        } else if (hoodPositionTicks > Constants.kHoodMaxHeight) {
+            hoodPositionTicks = Constants.kHoodMaxHeight;
         }
         setHood(hoodPositionTicks);
     }
@@ -541,14 +544,17 @@ public class Shooter implements Updateable {
         Holding,
         ReadyToShoot,
         Manual,
+        LeftSpin,
+        RightSpin,
         Zeroing;
     }
 
     public enum HoodState {
         Raising,
         Lowering,
+        Manual,
         Holding,
-        Automatic,
+        Tracking,
         Zeroing;
     }
 
@@ -561,6 +567,7 @@ public class Shooter implements Updateable {
     public enum IndexerState {
         NoBalls,
         Rotate,
+        Manual,
         StopRotating,
         UptakeBall,
         StopUptake;
@@ -570,11 +577,13 @@ public class Shooter implements Updateable {
         IntakeUp,
         IntakeDown,
         IntakeDownRev,
+        Manual,
         Indexing; //We dont know if this will be needed, not currently called
     }
 
     public enum ShooterState {
         NotShooting,
+        Manual,
         FlywheelOn,
         FlywheelOff,
         ShootBall,
@@ -584,5 +593,9 @@ public class Shooter implements Updateable {
     public enum ShooterControlState {
         PercentOutput,
         VelocityPID;
+    }
+
+    public enum TurretControlState {
+        
     }
 }
