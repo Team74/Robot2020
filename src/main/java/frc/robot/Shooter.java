@@ -38,7 +38,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private int turretState = 3;
+    private int turretState = 0;
     private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
@@ -152,7 +152,7 @@ public class Shooter implements Updateable {
                 turretState = 1;
             }
         } else if (inputManager.opLeftTrigger > .85) {
-            turretState = 2;
+            // turretState = 2;
             hoodState = HoodState.Automatic;
         } else {
             if (turretState != 3) {
@@ -182,15 +182,16 @@ public class Shooter implements Updateable {
     }
 
     public void update(double dt) {
-        System.out.println("Turret Encoder " + turret.getSelectedSensorPosition());
+        updateLimelightData();
+
         if (flywheelOn) {
             setFlywheel(14000);
         } else {
             setFlywheel(0);
         }
 
-        System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
-        System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
+        // System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
+        // System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
         switch (turretState) {
             case -1:
                 turret.set(ControlMode.PercentOutput, .25);
@@ -223,8 +224,8 @@ public class Shooter implements Updateable {
                 setHood(10000);
                 break;
             case Holding:
-                // hoodControlState = HoodControlState.PercentOutput;
-                // setHood(0);
+                hoodControlState = HoodControlState.PercentOutput;
+                setHood(0);
                 break;
             case Lowering:
                 // System.out.println("Hood down")
@@ -234,9 +235,11 @@ public class Shooter implements Updateable {
             case Zeroing:
                 // System.out.println("Zeroing hood");
                 zeroHood();
+                break;
             case Automatic:
                 hoodControlState = HoodControlState.MotionMagic;
                 alignHood();
+                break;
             default:
                 break;
         }
@@ -406,6 +409,7 @@ public class Shooter implements Updateable {
                 break;
             case PositionPID:
                 hood.set(ControlMode.Position, value);
+                break;
             default:
                 System.out.println("Using default case for hood set");
                 hood.set(ControlMode.PercentOutput, value);
@@ -489,7 +493,6 @@ public class Shooter implements Updateable {
     }
 
     private void alignShooter() {
-        updateLimelightData();
         autoTurretState = TurretState.Tracking;
         if ((validTargets == 0 || validTargets == Double.POSITIVE_INFINITY) || targetAngleHorizontal == Double.POSITIVE_INFINITY) {
             System.out.println("Error Align Shooter, Either no targets or recieving default value");
