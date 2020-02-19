@@ -19,8 +19,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class Shooter implements Updateable {
     private static Shooter kInstance = null;
 
-    private BaseMotorController flywheel, hood, intake, indexer, uptake;
-    private TalonSRX turret;
+    private BaseMotorController flywheel, intake, indexer, uptake;
+    private TalonSRX turret, hood;
 
     private DigitalInput hoodLimit, turretLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
@@ -186,6 +186,8 @@ public class Shooter implements Updateable {
             setFlywheel(0);
         }
 
+        System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
+        System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
         switch (turretState) {
             case -1:
                 turret.set(ControlMode.PercentOutput, .25);
@@ -202,25 +204,34 @@ public class Shooter implements Updateable {
             case 3:
                 zeroTurret();
                 break;
+            default:
+                break;
         }
 
-        System.out.println(hood.getSelectedSensorPosition());
+        System.out.println("Hood position " + hood.getSelectedSensorPosition(0));
+        System.out.println("Hood Velcity " + hood.getSelectedSensorVelocity(0)); 
+        System.out.println("Hood Closed Loop Error " + hood.getClosedLoopError(0));       
         System.out.println(hoodLimit.get());
         switch (hoodState) {
             case Raising:
-                System.out.println("Hood up");
-                setHood(0.1);
+                // System.out.println("Hood up");
+                hoodControlState = HoodControlState.MotionMagic;
+                setHood(10000);
                 break;
             case Holding:
-               setHood(0);
+                // hoodControlState = HoodControlState.PercentOutput;
+                // setHood(0);
                 break;
             case Lowering:
-                System.out.println("Hood down");
+                // System.out.println("Hood down")
+                hoodControlState = HoodControlState.PercentOutput;
                 setHood(-0.1);
                 break;
             case Zeroing:
-                System.out.println("Zeroing hood");
+                // System.out.println("Zeroing hood");
                 zeroHood();
+            default:
+                break;
         }
 
         if (isAdvancing) {
@@ -384,10 +395,12 @@ public class Shooter implements Updateable {
                 hood.set(ControlMode.PercentOutput, value);
                 break;
             case MotionMagic:
-                hood.set(ControlMode.Velocity, value);
+                hood.set(ControlMode.MotionMagic, value);
                 break;
+            case PositionPID:
+                hood.set(ControlMode.Position, value);
             default:
-                System.out.println("Using default case for flywheel set");
+                System.out.println("Using default case for hood set");
                 hood.set(ControlMode.PercentOutput, value);
                 break;
         }
@@ -434,23 +447,25 @@ public class Shooter implements Updateable {
 
     private void updateLimelightData() {
         targetAngleHorizontal = tx.getDouble(Double.POSITIVE_INFINITY);
-        System.out.println("Target ANgle Horizontal: " + targetAngleHorizontal);
+        // System.out.println("Target ANgle Horizontal: " + targetAngleHorizontal);
         targetAngleVertical = ty.getDouble(Double.POSITIVE_INFINITY);
         targetAreaScalar = ta.getDouble(Double.POSITIVE_INFINITY);
         validTargets = tv.getDouble(Double.POSITIVE_INFINITY);
-        System.out.println("Tv: " + validTargets);
+        // System.out.println("Tv: " + validTargets);
     }
 
     private void printTurretEncoderData() {
         int selSenPos = turret.getSelectedSensorPosition(0);
 		int pulseWidthWithoutOverflows = turret.getSensorCollection().getPulseWidthPosition() & 0xFFF;
-		System.out.println("pulseWidPos:" + pulseWidthWithoutOverflows + "   =>    " + "selSenPos:" + selSenPos);
+		// System.out.println("pulseWidPos:" + pulseWidthWithoutOverflows + "   =>    " + "selSenPos:" + selSenPos);
     }
 
     private void zeroHood() {
         if (!hoodLimit.get()) {
             hoodControlState = HoodControlState.PercentOutput;
+            setHood(-0.25);
         } else {
+            setHood(0.0);
             hood.setSelectedSensorPosition(0);
             hoodState = HoodState.Holding;
         }

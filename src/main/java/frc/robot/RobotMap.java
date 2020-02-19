@@ -48,7 +48,7 @@ public class RobotMap {
 
     public DigitalInput hoodLimit = new DigitalInput(0);
     public DigitalInput turretLimit = new DigitalInput(1);
-    // public DigitalInput indexerRotationLimit = new DigitalInput(1);
+    public DigitalInput indexerRotationLimit = new DigitalInput(9);
     public DigitalInput [] ballLimit = {new DigitalInput(2), 
                                         new DigitalInput(3), 
                                         new DigitalInput(4), 
@@ -70,12 +70,13 @@ public class RobotMap {
         // driveRightFrontEncoder = driveRightFront.getEncoder();
         driveRightBackEncoder = driveRightBack.getEncoder();
 
+        flywheel.configFactoryDefault(kTimeoutMs);
         flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
-        flywheel.setInverted(false);
         flywheel.setSensorPhase(true);
+        flywheel.setInverted(false);
         flywheel.configNominalOutputForward(0);
         flywheel.configNominalOutputReverse(0);
-        flywheel.configPeakOutputForward(100);
+        flywheel.configPeakOutputForward(1.00);
         flywheel.configPeakOutputReverse(0);
 
         flywheel.config_kF(0, Constants.kFlywheelF, kTimeoutMs);
@@ -83,16 +84,41 @@ public class RobotMap {
         flywheel.config_kI(0, Constants.kFlywheelI, kTimeoutMs);
         flywheel.config_kD(0, Constants.kFlywheelD, kTimeoutMs);
 
+        hood.configFactoryDefault(kTimeoutMs);
         hood.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
+        hood.setSensorPhase(true);
         hood.setInverted(true);
+        hood.configNominalOutputForward(0);
+        hood.configNominalOutputReverse(0);
+        hood.configPeakOutputForward(.25);
+        hood.configPeakOutputReverse(-.25);
+        hood.selectProfileSlot(0, 0);
+		hood.configMotionCruiseVelocity(Constants.kHoodMaxVelocity, kTimeoutMs);
+		hood.configMotionAcceleration(Constants.kHoodMaxAcceleration, kTimeoutMs);
+        hood.config_kF(0, Constants.kHoodF, kTimeoutMs);
+        hood.config_kP(0, Constants.kHoodP, kTimeoutMs);
+        hood.config_kI(0, Constants.kHoodI, kTimeoutMs);
+        hood.config_kD(0, Constants.kHoodD, kTimeoutMs);
 
         driveLeft.setInverted(true);
         // driveRight.setInverted(true);
 
+        turret.configFactoryDefault(kTimeoutMs);
         turret.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
         int pulseWidth = turret.getSensorCollection().getPulseWidthPosition();
         pulseWidth = pulseWidth & 0xFFF;
         turret.getSensorCollection().setQuadraturePosition(pulseWidth, kTimeoutMs);
+        turret.setSensorPhase(false);
+        turret.setInverted(true);
+        turret.configNominalOutputForward(0);
+        turret.configNominalOutputReverse(0);
+        turret.configPeakOutputForward(1.00);
+        turret.configPeakOutputReverse(-1.00);
+
+        turret.config_kF(0, Constants.kTurretF, kTimeoutMs);
+        turret.config_kP(0, Constants.kTurretP, kTimeoutMs);
+        turret.config_kI(0, Constants.kTurretI, kTimeoutMs);
+        turret.config_kD(0, Constants.kTurretD, kTimeoutMs);
     }
 
     public static RobotMap getInstance() {
