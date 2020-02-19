@@ -47,7 +47,8 @@ public class RobotMap {
     //find CAN id
 
     public DigitalInput hoodLimit = new DigitalInput(0);
-    public DigitalInput indexerRotationLimit = new DigitalInput(1);
+    public DigitalInput turretLimit = new DigitalInput(1);
+    public DigitalInput indexerRotationLimit = new DigitalInput(9);
     public DigitalInput [] ballLimit = {new DigitalInput(2), 
                                         new DigitalInput(3), 
                                         new DigitalInput(4), 

@@ -22,7 +22,7 @@ public class Shooter implements Updateable {
     private BaseMotorController flywheel, intake, indexer, uptake;
     private TalonSRX turret, hood;
 
-    private DigitalInput hoodLimit, indexerRotationLimit;
+    private DigitalInput hoodLimit, turretLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
 
     private InputManager inputManager;
@@ -38,7 +38,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private int turretState = 0;
+    private int turretState = 3;
     private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
@@ -81,6 +81,7 @@ public class Shooter implements Updateable {
         uptake = Robot.robotMap.uptake;
         
         hoodLimit = Robot.robotMap.hoodLimit;
+        turretLimit = Robot.robotMap.turretLimit;
         indexerRotationLimit = Robot.robotMap.indexerRotationLimit;
         ballLimits = Robot.robotMap.ballLimit;
 
@@ -154,7 +155,9 @@ public class Shooter implements Updateable {
             turretState = 2;
             hoodState = HoodState.Automatic;
         } else {
-            turretState = 0;
+            if (turretState != 3) {
+                turretState = 0;
+            }
             if (hoodState != HoodState.Zeroing) {
                 hoodState = HoodState.Holding;
             }
@@ -179,6 +182,7 @@ public class Shooter implements Updateable {
     }
 
     public void update(double dt) {
+        System.out.println("Turret Encoder " + turret.getSelectedSensorPosition());
         if (flywheelOn) {
             setFlywheel(14000);
         } else {
@@ -199,6 +203,9 @@ public class Shooter implements Updateable {
                 break;
             case 2:
                 alignShooter();
+                break;
+            case 3:
+                zeroTurret();
                 break;
             default:
                 break;
@@ -471,6 +478,16 @@ public class Shooter implements Updateable {
         }
     }
 
+    private void zeroTurret() {
+        if (!turretLimit.get()) {
+            turret.set(ControlMode.PercentOutput, 0.1);
+        } else {
+            turret.set(ControlMode.PercentOutput, 0);
+            turret.setSelectedSensorPosition(0);
+            turretState = 0;
+        }
+    }
+
     private void alignShooter() {
         updateLimelightData();
         autoTurretState = TurretState.Tracking;
@@ -520,7 +537,8 @@ public class Shooter implements Updateable {
         Tracking,
         Holding,
         ReadyToShoot,
-        Manual;
+        Manual,
+        Zeroing;
     }
 
     public enum HoodState {
