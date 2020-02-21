@@ -14,6 +14,8 @@ public class Drivebase implements Updateable {
 
     private double driveScaler = 1;
     private double turnScaler = driveScaler;
+
+    private DriveState driveState = DriveState.Teleop;
     
     public static Drivebase getInstance() {
         if (kInstance == null) {
@@ -26,7 +28,7 @@ public class Drivebase implements Updateable {
         inputManager = Robot.inputManager;
         robotMap = RobotMap.getInstance();
         leftMotor = robotMap.driveLeft; 
-        // rightMotor = robotMap.driveRight;
+        rightMotor = robotMap.driveRight;
 
         differentialDrive = new DifferentialDrive(leftMotor, rightMotor);
     }
@@ -51,6 +53,14 @@ public class Drivebase implements Updateable {
           }
           turnScaler = driveScaler;
     }
+
+    public void driveDistance(double inches) {
+
+    }
+
+    public void turnToAngle(double angleDegrees) {
+
+    }
     
     public void handleShift(ShiftState newState) {
         switch(newState) {
@@ -66,8 +76,21 @@ public class Drivebase implements Updateable {
         }
     }
 
-    private enum ShiftState {
+    public void setDriveState(DriveState newState) {
+        if (driveState == newState) {
+            System.out.println("Drive State already equals " + newState);
+        }
+        driveState = newState;
+    }
+
+    public enum ShiftState {
         High,
         Low;
+    }
+
+    public enum DriveState {
+        PathFollowing,
+        Autonomous,
+        Teleop;
     }
 }

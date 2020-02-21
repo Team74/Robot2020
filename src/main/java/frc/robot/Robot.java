@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import jdk.internal.util.xml.impl.Input;
+import frc.robot.Drivebase.DriveState;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -28,7 +29,7 @@ public class Robot extends TimedRobot {
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
-  ArrayList<Updateable> updateableObjects = new ArrayList<>();
+  ArrayList<Updateable> updateableObjects;
 
   static RobotMap robotMap;
   static InputManager inputManager;
@@ -44,18 +45,13 @@ public class Robot extends TimedRobot {
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
 
-    
     robotMap = RobotMap.getInstance();
-    inputManager = InputManager.getInstance();
-    updateableObjects.add(inputManager);
 
-    // drivebase = Drivebase.getInstance();
-    // updateableObjects.add(drivebase);
-    // climber = Climber.getInstance();
-    // updateableObjects.add(climber);
-    mVision = Vision.getInstance();
-    shooter = Shooter.getInstance();
-    updateableObjects.add(shooter);
+    updateableObjects = new ArrayList<>() {{
+      inputManager = InputManager.getInstance();
+      drivebase = Drivebase.getInstance();
+      shooter = Shooter.getInstance();
+    }};
   }
 
   @Override
@@ -85,6 +81,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     // robotMap.gearShift.set(Value.kForward);
+    drivebase.setDriveState(DriveState.Teleop);
   }
 
 

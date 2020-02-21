@@ -24,9 +24,9 @@ public class RobotMap {
     public CANSparkMax driveLeftBack = new CANSparkMax(22, CANSparkMaxLowLevel.MotorType.kBrushless);
     public SpeedControllerGroup driveLeft = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
 
-    // public CANSparkMax driveRightFront = new CANSparkMax(44, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax driveRightFront = new CANSparkMax(44, CANSparkMaxLowLevel.MotorType.kBrushless);
     public CANSparkMax driveRightBack = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
-    // public SpeedControllerGroup driveRight = new SpeedControllerGroup(driveRightFront, driveRightBack);
+    public SpeedControllerGroup driveRight = new SpeedControllerGroup(driveRightFront, driveRightBack);
 
     public CANEncoder driveLeftFrontEncoder;
     public CANEncoder driveLeftBackEncoder;
@@ -67,7 +67,7 @@ public class RobotMap {
     private RobotMap() {
         driveLeftFrontEncoder = driveLeftFront.getEncoder();
         driveLeftBackEncoder = driveLeftBack.getEncoder();
-        // driveRightFrontEncoder = driveRightFront.getEncoder();
+        driveRightFrontEncoder = driveRightFront.getEncoder();
         driveRightBackEncoder = driveRightBack.getEncoder();
 
         flywheel.configFactoryDefault(kTimeoutMs);
