@@ -29,6 +29,7 @@ public class DriveDistanceAction implements Action {
 
     public boolean isFinished() {
         //check to see if we've covered the driven distance
+        return false;
     }
 
     public void update() {

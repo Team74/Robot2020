@@ -29,6 +29,7 @@ public class TurnAngleAction implements Action {
 
     public boolean isFinished() {
         //Check to see if we turned to the desired angle
+        return false;
     }
 
     public void update() {

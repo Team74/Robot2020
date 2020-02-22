@@ -329,11 +329,10 @@ public class Shooter implements Updateable {
     }
 
     public void autoIndex() {
-        /*
         switch (indexerState) {
             //checks for the first ball intook
             case NoBalls:
-                if(ballLimits[0].get() == true && intakeState == IntakeState.IntakeDown) {
+                if(ballLimits[0].get() && intakeState == IntakeState.IntakeDown) {
                     indexerState = IndexerState.Rotate;
                 }
                 break;
@@ -348,7 +347,7 @@ public class Shooter implements Updateable {
             //stops rotating
             case StopRotating: 
                 //no places left and uptake ready
-                if (indexerFull() && hasPrepedBall()) {
+                if (indexerFull()) {
                     indexerState = IndexerState.StopRotating;
                     break;
                 }
@@ -358,33 +357,32 @@ public class Shooter implements Updateable {
                     break;
                 }
                 //ball in uptake pos and uptake empty
-                if (!hasPrepedBall() && ballLimits[3].get()) {
-                    indexerState = IndexerState.UptakeBall;
-                    break;
-                }
+                // if (!ballLimits[3].get()) {
+                //     indexerState = IndexerState.UptakeBall;
+                //     break;
+                // }
                 break;
             //uptakes a ball
-            case UptakeBall:
-                uptake.set(ControlMode.PercentOutput, 100);
-                if (hasPrepedBall()) {
-                    indexerState = IndexerState.StopUptake;
-                }
-                break;
-            //stops the uptake
-            case StopUptake:
-                if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
-                    indexerState = IndexerState.Rotate;
-                } else {
-                    indexerState = IndexerState.NoBalls;
-                }
+            // case UptakeBall:
+            //     uptake.set(ControlMode.PercentOutput, 100);
+            //     if (hasPrepedBall()) {
+            //         indexerState = IndexerState.StopUptake;
+            //     }
+            //     break;
+            // //stops the uptake
+            // case StopUptake:
+            //     if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
+            //         indexerState = IndexerState.Rotate;
+            //     } else {
+            //         indexerState = IndexerState.NoBalls;
+            //     }
                 
-                break;
+            //     break;
         }
-        */
     }
 
     private boolean indexerFull() {
-        if (ballLimits[0].get() && ballLimits[1].get() && ballLimits[2].get() && ballLimits[3].get()) {
+        if (ballLimits[0].get() && ballLimits[1].get() && ballLimits[2].get() && ballLimits[3].get() && ballLimits[4].get()) {
             return true;
         } else {
             return false;
@@ -440,8 +438,12 @@ public class Shooter implements Updateable {
         }
     } 
 
-    private void setTurretControlMode(TurretControlState tcs) {
-        turretControlState = tcs;
+    private void setTurretControlState(TurretControlState newState) {
+        if (turretControlState == newState) {
+            System.out.println("turretCOntrolState already equals " + newState);
+            return;
+        }
+        turretControlState = newState;
     }
 
     private void setFlywheel(double value) {
@@ -519,7 +521,7 @@ public class Shooter implements Updateable {
         
         if (validTargets == 0) {
             System.out.println("No targets in view");
-            setTurretControlMode(TurretControlState.MotionMagic);
+            setTurretControlState(TurretControlState.MotionMagic);
             if (turret.getSelectedSensorPosition() != Constants.kTurretMaxRotation && !hasHitLeft) {
                 setTurret(Constants.kTurretMaxRotation);
                 if (turret.getSelectedSensorPosition() == Constants.kTurretMaxRotation) {
@@ -531,7 +533,7 @@ public class Shooter implements Updateable {
                     System.out.println("ur dumb");
                 }
             }
-            setTurretControlMode(TurretControlState.PercentOutput);
+            setTurretControlState(TurretControlState.PercentOutput);
         } else {
             //double turretAngle = turret.getSelectedSensorPosition();
             if (targetAngleHorizontal > 0.0 - targetDeadband) {

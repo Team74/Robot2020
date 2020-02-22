@@ -6,12 +6,12 @@ import frc.robot.autonomous.actions.*;
 import java.util.Arrays;
 
 import edu.wpi.first.wpilibj.Timer;
-import frc.lib.trajectory.TrajectoryGenerator;
-import frc.lib.trajectory.TrajectoryGenerator.Trajectories;
+// import frc.lib.trajectory.TrajectoryGenerator;
+// import frc.lib.trajectory.TrajectoryGenerator.Trajectories;
 
 public class TestAuton extends AutonBase {
 
-    private final Trajectories trajectories = TrajectoryGenerator.getInstance().getTrajectories();
+    // private final Trajectories trajectories = TrajectoryGenerator.getInstance().getTrajectories();
 
     public TestAuton() {
 

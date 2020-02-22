@@ -38,7 +38,8 @@ public class Drivebase implements Updateable {
     }
 
     public void update(double dt) {
-        differentialDrive.arcadeDrive(driveScaler * inputManager.driverLeftStickY, -turnScaler* inputManager.driverRightStickX);
+        differentialDrive.arcadeDrive(driveScaler * inputManager.driverLeftStickY, -turnScaler * inputManager.driverRightStickX);
+        // differentialDrive.tankDrive(driveScaler * inputManager.driverLeftStickY, driveScaler * inputManager.driverLeftStickY);
 
         if (inputManager.driverLeftBumper) {
             handleShift(ShiftState.Low);
