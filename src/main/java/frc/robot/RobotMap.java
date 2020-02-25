@@ -118,6 +118,8 @@ public class RobotMap {
         turret.config_kP(0, Constants.kTurretP, kTimeoutMs);
         turret.config_kI(0, Constants.kTurretI, kTimeoutMs);
         turret.config_kD(0, Constants.kTurretD, kTimeoutMs);
+
+        uptake.setInverted(true);
     }
 
     public static RobotMap getInstance() {

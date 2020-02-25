@@ -19,8 +19,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class Shooter implements Updateable {
     private static Shooter kInstance = null;
 
-    private BaseMotorController flywheel, intake, indexer, uptake;
-    private TalonSRX turret, hood;
+    private BaseMotorController intake, indexer, uptake;
+    private TalonSRX turret, hood, flywheel;
 
     private DigitalInput hoodLimit, turretLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
@@ -38,7 +38,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private HoodState hoodState = HoodState.Holding;
+    private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
     private ShooterState shootState = ShooterState.NotShooting;
@@ -187,12 +187,12 @@ public class Shooter implements Updateable {
         zeroHoodEncoder();
 
         if (flywheelOn) {
-            setFlywheel(14000);
+            setFlywheel(28000);
         } else {
-            setFlywheel(0);
+            // setFlywheel(0);
         }
 
-        System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
+        // System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
         // System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
         switch (turretState) {
             case RightSpin:
@@ -292,20 +292,24 @@ public class Shooter implements Updateable {
     }
 
     public void shoot() {
+        System.out.println("Flywheel speed: " + flywheel.getSelectedSensorVelocity(0));
         switch (shootState) {
             case NotShooting:
-                if (shooterOn && flywheelUpToSpeed()) {
+                if (shooterOn && flywheelUpToSpeed(28000)) {
                     shootState = ShooterState.ShootBall;
-                } else if (shooterOn && !flywheelUpToSpeed()) {
+                } else if (shooterOn && !flywheelUpToSpeed(28000)) {
                     shootState = ShooterState.FlywheelOn;
+                } else if (!shooterOn) {
+                    shootState = ShooterState.FlywheelOff;
                 }
                 break;
             case ShootBall:
                 if (!shooterOn) {
                     shootState = ShooterState.NotShooting;
+                    uptake.set(ControlMode.PercentOutput, 0.0);
                     break;
                 }
-                uptake.set(ControlMode.PercentOutput, 100);
+                uptake.set(ControlMode.PercentOutput, 1.0);
                 if (indexerHasBalls()) {
                     shootState = ShooterState.LoadBall;
                 } else if (!indexerHasBalls()) {
@@ -318,8 +322,8 @@ public class Shooter implements Updateable {
                 }
                 break;
             case FlywheelOn:
-                setFlywheel(100);
-                if (flywheelUpToSpeed()) {
+                setFlywheel(28000);
+                if (flywheelUpToSpeed(28000)) {
                     shootState = ShooterState.ShootBall;
                 }
                 break;
@@ -417,12 +421,20 @@ public class Shooter implements Updateable {
         }
     }
 
-    private void setHoodControlState(HoodControlState newState) {
+    public void setHoodControlState(HoodControlState newState) {
         if (hoodControlState == newState) {
             System.out.println("hoodControlState already equals " + newState);
             return;
         }
         hoodControlState = newState;
+    }
+
+    public void setHoodState(HoodState newState) {
+        if (hoodState == newState) {
+            System.out.println("hoodState already equals " + newState);
+            return;
+        }
+        hoodState = newState;        
     }
 
     private void setTurret(double value) {
@@ -451,12 +463,20 @@ public class Shooter implements Updateable {
         }
     } 
 
-    private void setTurretControlState(TurretControlState newState) {
+    public void setTurretControlState(TurretControlState newState) {
         if (turretControlState == newState) {
-            System.out.println("turretCOntrolState already equals " + newState);
+            System.out.println("turretControlState already equals " + newState);
             return;
         }
         turretControlState = newState;
+    }
+
+    public void setTurretState(TurretState newState) {
+        if (turretState == newState) {
+            System.out.println("turretState already equals " + newState);
+            return;
+        }
+        turretState = newState;  
     }
 
     private void setFlywheel(double value) {
@@ -486,8 +506,9 @@ public class Shooter implements Updateable {
         return !indexerRotationLimit.get();
     }
 
-    private boolean flywheelUpToSpeed() {
-        return true;
+    private boolean flywheelUpToSpeed(int targetSpeed) {
+        int currentSpeed = flywheel.getSelectedSensorVelocity(0);
+        return (currentSpeed >= (targetSpeed - 1000) && currentSpeed <= (targetSpeed + 1000));
     }
 
     private void updateLimelightData() {

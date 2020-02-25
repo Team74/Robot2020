@@ -6,6 +6,7 @@
 /*----------------------------------------------------------------------------*/
 
 package frc.robot;
+
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,6 +16,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 //import jdk.internal.util.xml.impl.Input;
 import frc.robot.Drivebase.DriveState;
+import frc.robot.Shooter.HoodState;
+import frc.robot.Shooter.TurretState;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -89,6 +92,9 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     // robotMap.gearShift.set(Value.kForward);
     drivebase.setDriveState(DriveState.Teleop);
+    shooter.setTurretState(TurretState.Zeroing);
+    shooter.setHoodState(HoodState.Zeroing);
+
   }
 
 
