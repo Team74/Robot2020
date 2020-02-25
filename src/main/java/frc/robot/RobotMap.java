@@ -20,12 +20,12 @@ public class RobotMap {
 
     private static RobotMap kInstance = null;
 
-    public CANSparkMax driveLeftFront = new CANSparkMax(11, CANSparkMaxLowLevel.MotorType.kBrushless);
-    public CANSparkMax driveLeftBack = new CANSparkMax(22, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax driveLeftFront = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax driveLeftBack = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
     public SpeedControllerGroup driveLeft = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
 
-    public CANSparkMax driveRightFront = new CANSparkMax(44, CANSparkMaxLowLevel.MotorType.kBrushless);
-    public CANSparkMax driveRightBack = new CANSparkMax(3, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax driveRightFront = new CANSparkMax(12, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax driveRightBack = new CANSparkMax(15, CANSparkMaxLowLevel.MotorType.kBrushless);
     public SpeedControllerGroup driveRight = new SpeedControllerGroup(driveRightFront, driveRightBack);
 
     public CANEncoder driveLeftFrontEncoder;
@@ -33,17 +33,16 @@ public class RobotMap {
     public CANEncoder driveRightFrontEncoder;
     public CANEncoder driveRightBackEncoder;
 
-    public TalonSRX intake = new TalonSRX(0);         
-    public TalonSRX flywheel = new TalonSRX(19);
-    public VictorSPX test = new VictorSPX(6);
+    public VictorSPX intake = new VictorSPX(7);         
+    public TalonSRX flywheel = new TalonSRX(17);
     public TalonSRX turret = new TalonSRX(18);
-    public TalonSRX hood = new TalonSRX(21);  
-    public TalonSRX indexer = new TalonSRX(1);
-    public VictorSPX uptake = new VictorSPX(7); 
+    public TalonSRX hood = new TalonSRX(20);  
+    public TalonSRX indexer = new TalonSRX(21);
+    public VictorSPX uptake = new VictorSPX(23); 
     
 
-    public TalonSRX climber = new TalonSRX(0);
-    public TalonSRX cliberBalence= new TalonSRX(0);
+    // public TalonSRX climber = new TalonSRX(0);
+    // public TalonSRX cliberBalence= new TalonSRX(0);
     //find CAN id
 
     public DigitalInput hoodLimit = new DigitalInput(0);

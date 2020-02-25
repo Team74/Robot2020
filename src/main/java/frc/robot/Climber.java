@@ -20,14 +20,15 @@ public class Climber implements Updateable {
     }
 
     public Climber() {
-        climbMotor = Robot.robotMap.climber;
-        balenceMotor = Robot.robotMap.cliberBalence;
+        // climbMotor = Robot.robotMap.climber;
+        // balenceMotor = Robot.robotMap.cliberBalence;
         inputManager = Robot.inputManager;
     }
 
     public void dashboard() {
 
     }
+    
     public void handleInput() {
         if (inputManager.driverPOV != -1) {
             if(inputManager.driverPOV == 0) {

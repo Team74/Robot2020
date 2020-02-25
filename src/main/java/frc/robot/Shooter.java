@@ -38,7 +38,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private HoodState hoodState = HoodState.Zeroing;
+    private HoodState hoodState = HoodState.Holding;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
     private ShooterState shootState = ShooterState.NotShooting;
@@ -54,11 +54,10 @@ public class Shooter implements Updateable {
     private boolean driverAhold = false;
     private int indexerHold = 0;
 
-    private int maximumRotation = 891324;
     private boolean hasHitLeft = false;
-    private double targetDeadband = 0.5;
+    private final double turretAlignmentDeadband = 0.5;
 
-    private TurretState turretState = TurretState.Holding;
+    private TurretState turretState = TurretState.Zeroing;
     private TurretControlState turretControlState = TurretControlState.PercentOutput;
 
     private NetworkTable limelight;
@@ -182,7 +181,10 @@ public class Shooter implements Updateable {
     }
 
     public void update(double dt) {
+        handleInput();
         updateLimelightData();
+        zeroTurretEncoder();
+        zeroHoodEncoder();
 
         if (flywheelOn) {
             setFlywheel(14000);
@@ -245,8 +247,8 @@ public class Shooter implements Updateable {
         }
 
         if (isAdvancing) {
-            indexer.set(ControlMode.PercentOutput, 20);
-            isAdvancing = hasAdvanced();
+            indexer.set(ControlMode.PercentOutput, -.2);
+            // isAdvancing = hasAdvanced();
         } else {
             indexer.set(ControlMode.PercentOutput, 0);
         }
@@ -424,17 +426,28 @@ public class Shooter implements Updateable {
     }
 
     private void setTurret(double value) {
-        if (turret.getSelectedSensorPosition() > 0 || turret.getSelectedSensorPosition() <= 0) {
+        int currentPose = turret.getSelectedSensorPosition(0);
+        if (turretState != TurretState.Zeroing) {
             switch (turretControlState) {
                 case PercentOutput:
-                    turret.set(ControlMode.PercentOutput, value);
-                    break;
+                    if (currentPose < Constants.kTurretMinimumRotation && value < 0) {
+                        turret.set(ControlMode.PercentOutput, 0.0);
+                        break;
+                    } else if (currentPose > Constants.kTurretMaxRotation && value > 0) {
+                        turret.set(ControlMode.PercentOutput, 0.0);
+                        break;
+                    } else {
+                        turret.set(ControlMode.PercentOutput, value);
+                        break;
+                    }
                 case MotionMagic:
                     turret.set(ControlMode.MotionMagic, value);
                     break;
                 default:
                     break;
             }
+        } else if (turretState == TurretState.Zeroing) {
+            turret.set(ControlMode.PercentOutput, value);
         }
     } 
 
@@ -498,18 +511,28 @@ public class Shooter implements Updateable {
             setHood(-0.25);
         } else {
             setHood(0.0);
-            hood.setSelectedSensorPosition(0);
             hoodState = HoodState.Holding;
+        }
+    }
+
+    private void zeroHoodEncoder() {
+        if (turretLimit.get()) {
+            hood.setSelectedSensorPosition(0, 0, 30);
         }
     }
 
     private void zeroTurret() {
         if (!turretLimit.get()) {
-            setTurret(0.1);
+            setTurret(-0.20);
         } else {
             setTurret(0);
-            turret.setSelectedSensorPosition(0);
             turretState = TurretState.Holding;
+        }
+    }
+
+    private void zeroTurretEncoder() {
+        if (turretLimit.get()) {
+            turret.setSelectedSensorPosition(0, 0, 30);
         }
     }
 
@@ -536,10 +559,10 @@ public class Shooter implements Updateable {
             setTurretControlState(TurretControlState.PercentOutput);
         } else {
             //double turretAngle = turret.getSelectedSensorPosition();
-            if (targetAngleHorizontal > 0.0 - targetDeadband) {
+            if (targetAngleHorizontal > 0.0 - turretAlignmentDeadband) {
                 //spin one way
                 setTurret(0.1);
-            } else if (targetAngleHorizontal < 0.0 + targetDeadband) {
+            } else if (targetAngleHorizontal < 0.0 + turretAlignmentDeadband) {
                 setTurret(-.1);
                 //go the other way
             } else 

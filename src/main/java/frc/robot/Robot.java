@@ -47,11 +47,18 @@ public class Robot extends TimedRobot {
 
     robotMap = RobotMap.getInstance();
 
-    updateableObjects = new ArrayList<>() {{
-      inputManager = InputManager.getInstance();
-      drivebase = Drivebase.getInstance();
-      shooter = Shooter.getInstance();
-    }};
+    inputManager = InputManager.getInstance();
+    drivebase = Drivebase.getInstance();
+    shooter = Shooter.getInstance();
+
+    updateableObjects = new ArrayList<>() {
+      private static final long serialVersionUID = -99999;
+      {
+      add(inputManager);
+      add(drivebase);
+      add(shooter);
+      }
+    };
   }
 
   @Override
@@ -92,8 +99,8 @@ public class Robot extends TimedRobot {
       object.dashboard();
     }
 
-    shooter.handleInput();
-    shooter.autoIndex();
+    // shooter.handleInput();
+    // shooter.autoIndex();
   }
 
   @Override
