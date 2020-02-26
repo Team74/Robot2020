@@ -20,18 +20,11 @@ public class RobotMap {
 
     private static RobotMap kInstance = null;
 
-    public CANSparkMax driveLeftFront = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
-    public CANSparkMax driveLeftBack = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
-    public SpeedControllerGroup driveLeft = new SpeedControllerGroup(driveLeftFront, driveLeftBack);
+    public CANSparkMax leftDriveMaster  = new CANSparkMax(5, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax leftDriveFollower = new CANSparkMax(4, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-    public CANSparkMax driveRightFront = new CANSparkMax(12, CANSparkMaxLowLevel.MotorType.kBrushless);
-    public CANSparkMax driveRightBack = new CANSparkMax(15, CANSparkMaxLowLevel.MotorType.kBrushless);
-    public SpeedControllerGroup driveRight = new SpeedControllerGroup(driveRightFront, driveRightBack);
-
-    public CANEncoder driveLeftFrontEncoder;
-    public CANEncoder driveLeftBackEncoder;
-    public CANEncoder driveRightFrontEncoder;
-    public CANEncoder driveRightBackEncoder;
+    public CANSparkMax rightDriveMaster = new CANSparkMax(12, CANSparkMaxLowLevel.MotorType.kBrushless);
+    public CANSparkMax rightDriveFollower = new CANSparkMax(15, CANSparkMaxLowLevel.MotorType.kBrushless);
 
     public VictorSPX intake = new VictorSPX(7);         
     public TalonSRX flywheel = new TalonSRX(17);
@@ -61,14 +54,9 @@ public class RobotMap {
     //Limelight network table
     public NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
 
-     public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
+    public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
 
     private RobotMap() {
-        driveLeftFrontEncoder = driveLeftFront.getEncoder();
-        driveLeftBackEncoder = driveLeftBack.getEncoder();
-        driveRightFrontEncoder = driveRightFront.getEncoder();
-        driveRightBackEncoder = driveRightBack.getEncoder();
-
         flywheel.configFactoryDefault(kTimeoutMs);
         flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
         flywheel.setSensorPhase(true);
@@ -98,9 +86,6 @@ public class RobotMap {
         hood.config_kP(0, Constants.kHoodP, kTimeoutMs);
         hood.config_kI(0, Constants.kHoodI, kTimeoutMs);
         hood.config_kD(0, Constants.kHoodD, kTimeoutMs);
-
-        driveLeft.setInverted(true);
-        // driveRight.setInverted(true);
 
         turret.configFactoryDefault(kTimeoutMs);
         turret.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);

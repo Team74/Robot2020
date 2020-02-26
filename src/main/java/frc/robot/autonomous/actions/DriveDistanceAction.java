@@ -8,19 +8,22 @@ public class DriveDistanceAction implements Action {
 
     public final double startTime;
     public final double maxRunTime;
-    public final double driveDistanceIn;
+    public final double targetDistanceIn;
 
     public final Drivebase driveBase;
 
-    public DriveDistanceAction(double maxRunTime, double driveDistanceIn) {
+    public DriveDistanceAction(double maxRunTime, double targetDistanceIn) {
         driveBase = Drivebase.getInstance();
         startTime = Timer.getFPGATimestamp();
         this.maxRunTime = maxRunTime;
-        this.driveDistanceIn = driveDistanceIn;
+        this.targetDistanceIn = targetDistanceIn;
     }
 
     public void start() {
-        driveBase.setDriveState(DriveState.Autonomous);
+        driveBase.setDriveState(DriveState.DriveStraight);
+        driveBase.setAtTarget(false);
+        driveBase.setTargetDistance(this.targetDistanceIn);
+        driveBase.zeroDriveEncoders();
     }
 
     public void done() {
@@ -29,14 +32,9 @@ public class DriveDistanceAction implements Action {
 
     public boolean isFinished() {
         //check to see if we've covered the driven distance
-        return false;
+        return (driveBase.atTarget() || !(maxRunTime <= (Timer.getFPGATimestamp() - startTime)));
     }
 
     public void update() {
-        if (!isFinished() || !(maxRunTime <= (Timer.getFPGATimestamp() - startTime))) {
-            driveBase.driveDistance(this.driveDistanceIn);
-        } else {       
-            done();
-        }
     }
 }

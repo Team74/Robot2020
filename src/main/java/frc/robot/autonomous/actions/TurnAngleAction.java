@@ -20,7 +20,9 @@ public class TurnAngleAction implements Action {
     }
     
     public void start() {
-        driveBase.setDriveState(DriveState.Autonomous);
+        driveBase.setDriveState(DriveState.TurnAngle);
+        driveBase.setAtTarget(false);
+        driveBase.setTargetHeading(this.turnAngleDeg);
     }
 
     public void done() {
@@ -28,15 +30,10 @@ public class TurnAngleAction implements Action {
     }
 
     public boolean isFinished() {
-        //Check to see if we turned to the desired angle
-        return false;
+        return (maxRunTime <= (Timer.getFPGATimestamp() - startTime) || driveBase.atTarget());
     }
 
     public void update() {
-        if (!isFinished() || !(maxRunTime <= (Timer.getFPGATimestamp() - startTime))) {
-            driveBase.turnToAngle(this.turnAngleDeg);
-        } else {       
-            done();
-        }
+
     }
 }
