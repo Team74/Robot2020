@@ -19,8 +19,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class Shooter implements Updateable {
     private static Shooter kInstance = null;
 
-    private BaseMotorController intake, indexer, uptake;
-    private TalonSRX turret, hood, flywheel;
+    private BaseMotorController intake, uptake;
+    private TalonSRX turret, hood, flywheel, indexer;
 
     private DigitalInput hoodLimit, turretLimit, indexerRotationLimit;
     private DigitalInput[] ballLimits;
@@ -254,6 +254,10 @@ public class Shooter implements Updateable {
         }
         intake();
         shoot();
+
+        if (indexer.getSupplyCurrent() > Double.POSITIVE_INFINITY) {
+            indexer.set(ControlMode.PercentOutput, 0);
+        }
     }
 
     public void intake() {
