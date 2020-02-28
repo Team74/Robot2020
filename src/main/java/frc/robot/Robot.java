@@ -75,6 +75,8 @@ public class Robot extends TimedRobot {
     m_autoSelected = m_chooser.getSelected();
     // robotMap.gearShift.set(Value.kForward);
     System.out.println("Auto selected: " + m_autoSelected);
+    drivebase.zeroGyro();
+    drivebase.zeroDriveEncoders();
   }
 
   @Override
@@ -107,7 +109,6 @@ public class Robot extends TimedRobot {
     //   object.dashboard();
     // }
       inputManager.update(0);
-      drivebase.update(0);
       if (inputManager.driverA) {
         robotMap.intake.set(ControlMode.PercentOutput, 1);
       } else {
