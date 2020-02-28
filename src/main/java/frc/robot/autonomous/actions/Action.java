@@ -6,6 +6,7 @@ Template for all actions
 
 public interface Action {
     double startTime = 0.0;
+    double maxRunTime = 0.0;
 
     //Containts code to start action
     void start();
