@@ -39,7 +39,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private HoodState hoodState = HoodState.Holding;
+    private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
     private ShooterState shootState = ShooterState.NotShooting;
@@ -233,8 +233,8 @@ public class Shooter implements Updateable {
         switch (hoodState) {
             case Raising:
                 // System.out.println("Hood up");
-                hoodControlState = HoodControlState.MotionMagic;
-                setHood(10000);
+                hoodControlState = HoodControlState.PercentOutput;
+                setHood(.2);
                 break;
             case Holding:
                 hoodControlState = HoodControlState.PercentOutput;

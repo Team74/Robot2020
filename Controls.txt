@@ -1,0 +1,43 @@
+DRIVER:
+
+Left Stick =
+Right Stick =
+
+A =
+B = 
+X = 
+Y =
+
+POV
+0 =
+90 =
+180 =
+270 =
+
+Left Trigger =
+Left Bumper =
+Right Trigger =
+Right Bumper =
+
+
+
+OPERATOR:
+
+Left Stick =
+Right Stick =
+
+A =
+B = 
+X = 
+Y =
+
+POV
+0 =
+90 =
+180 =
+270 =
+
+Left Trigger =
+Left Bumper =
+Right Trigger =
+Right Bumper =

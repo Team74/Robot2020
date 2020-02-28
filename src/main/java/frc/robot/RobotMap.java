@@ -87,14 +87,11 @@ public class RobotMap {
         hood.config_kI(0, Constants.kHoodI, kTimeoutMs);
         hood.config_kD(0, Constants.kHoodD, kTimeoutMs);
 
-<<<<<<< HEAD
-        driveLeft.setInverted(true);
+        // driveLeft.setInverted(true);
         // driveRight.setInverted(true);
 
         indexer.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
 
-=======
->>>>>>> 416e863eae231a4c5ca5df785bb5dda3d652bd0a
         turret.configFactoryDefault(kTimeoutMs);
         turret.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
         int pulseWidth = turret.getSensorCollection().getPulseWidthPosition();

@@ -109,6 +109,8 @@ public class Robot extends TimedRobot {
     //   object.dashboard();
     // }
       inputManager.update(0);
+      shooter.update(0);
+      System.out.println("Hood limit" + robotMap.hoodLimit.get());
       if (inputManager.driverA) {
         robotMap.intake.set(ControlMode.PercentOutput, 1);
       } else {
