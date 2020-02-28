@@ -63,6 +63,7 @@ public class Shooter implements Updateable {
 
     private NetworkTable limelight;
     private NetworkTableEntry tx, ty, ta, tv;
+    private boolean isLedOn = false, ledToggling = false;
 
     //-27 to 27 degrees
     private double targetAngleHorizontal;
@@ -173,6 +174,18 @@ public class Shooter implements Updateable {
             }
         }
 
+        //Limelight led control
+        //Replace button with appropriate inputManager call
+        if (button && !isLedOn && !ledToggling) {
+            isLedOn = true;
+            ledToggling = true;
+        } else if(button && isLedOn && !ledToggling) {
+            isLedOn = false;
+            ledToggling = true;
+        } else if (!button) {
+            ledToggling = false;
+        }
+
         //Manual Index
         if (inputManager.opY && indexerHold == 0) {
             isAdvancing = true;
@@ -196,6 +209,12 @@ public class Shooter implements Updateable {
         updateLimelightData();
         zeroTurretEncoder();
         zeroHoodEncoder();
+
+        if(isLedOn) {
+            setLimelightLEDS(LimelightLEDState.On);
+        } else {
+            setLimelightLEDS(LimelightLEDState.Off);
+        }
 
         if (flywheelOn) {
             setFlywheel(28000);
@@ -535,6 +554,23 @@ public class Shooter implements Updateable {
         // System.out.println("Tv: " + validTargets);
     }
 
+    private void setLimelightLEDS(LimelightLEDState newState) {
+        switch(newState) {
+            case On:
+                limelight.getEntry("ledMode").setNumber(3);
+                break;
+            case Off:
+                limelight.getEntry("ledMode").setNumber(1);
+                break;
+            case Blinking:
+                limelight.getEntry("ledMode").setNumber(2);
+                break;
+            default:
+                limelight.getEntry("ledMode").setNumber(3);
+                break;
+        }
+    }
+
     private void printTurretEncoderData() {
         int selSenPos = turret.getSelectedSensorPosition(0);
 		int pulseWidthWithoutOverflows = turret.getSensorCollection().getPulseWidthPosition() & 0xFFF;
@@ -616,6 +652,11 @@ public class Shooter implements Updateable {
         setHood(hoodPositionTicks);
     }
 
+    public enum LimelightLEDState {
+        On,
+        Off,
+        Blinking;
+    }
     
     public enum TurretState {
         Tracking,
