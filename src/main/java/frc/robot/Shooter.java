@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -38,7 +39,7 @@ public class Shooter implements Updateable {
     };
     private Boolean flywheelOn = false;
     private IntakeState intakeState = IntakeState.IntakeUp;
-    private HoodState hoodState = HoodState.Zeroing;
+    private HoodState hoodState = HoodState.Holding;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
     private boolean isAdvancing = false;
     private ShooterState shootState = ShooterState.NotShooting;
@@ -57,7 +58,7 @@ public class Shooter implements Updateable {
     private boolean hasHitLeft = false;
     private final double turretAlignmentDeadband = 0.5;
 
-    private TurretState turretState = TurretState.Zeroing;
+    private TurretState turretState = TurretState.Holding;
     private TurretControlState turretControlState = TurretControlState.PercentOutput;
 
     private NetworkTable limelight;
@@ -102,7 +103,16 @@ public class Shooter implements Updateable {
     }
 
     public void dashboard() {
- 
+        SmartDashboard.putBoolean("Gear", Robot.inputManager.opY);
+        SmartDashboard.putNumber("Indexer Current", indexer.getSupplyCurrent());
+
+        SmartDashboard.putBoolean("Index 1", Robot.robotMap.ballLimit[0].get());
+        SmartDashboard.putBoolean("Index 2", Robot.robotMap.ballLimit[1].get());
+        SmartDashboard.putBoolean("Index 3", Robot.robotMap.ballLimit[2].get());
+        SmartDashboard.putBoolean("Index 4", Robot.robotMap.ballLimit[3].get());
+        SmartDashboard.putBoolean("Index 5", Robot.robotMap.ballLimit[4].get());
+        
+        SmartDashboard.putBoolean("Flywheel", flywheelOn);
     }
 
     public void handleInput() {
@@ -132,6 +142,7 @@ public class Shooter implements Updateable {
             driverAhold = true;
         } else if (!inputManager.driverA) {
             driverAhold = false;
+            intake.set(ControlMode.PercentOutput, 0);
         }
 
         if (inputManager.driverB) {
@@ -272,7 +283,7 @@ public class Shooter implements Updateable {
                 break;
             //deploy the intake
             case IntakeDown:
-            intake.set(ControlMode.PercentOutput, 100);
+            intake.set(ControlMode.PercentOutput, 1.0);
 
                 if (indexerFull() && !intakeFrwd) {
                     intakeState = IntakeState.IntakeUp;
@@ -282,7 +293,7 @@ public class Shooter implements Updateable {
                 break;
             //reverse the intake, once it is deployed
             case IntakeDownRev:
-                intake.set(ControlMode.PercentOutput, -100);
+                intake.set(ControlMode.PercentOutput, -1.0);
                  
                 if (!intakeFrwd) {
                     intakeState = IntakeState.IntakeUp;

@@ -9,6 +9,8 @@ package frc.robot;
 
 import java.util.ArrayList;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -94,16 +96,36 @@ public class Robot extends TimedRobot {
     drivebase.setDriveState(DriveState.Teleop);
     shooter.setTurretState(TurretState.Zeroing);
     shooter.setHoodState(HoodState.Zeroing);
-
+    robotMap.indexer.setSelectedSensorPosition(0);
   }
 
 
   @Override
   public void teleopPeriodic() {
-    for(Updateable object : updateableObjects) {
-      object.update(0.0);
-      object.dashboard();
-    }
+    // for(Updateable object : updateableObjects) {
+    //   object.update(0.0);
+    //   object.dashboard();
+    // }
+      inputManager.update(0);
+      drivebase.update(0);
+      if (inputManager.driverA) {
+        robotMap.intake.set(ControlMode.PercentOutput, 1);
+      } else {
+        robotMap.intake.set(ControlMode.PercentOutput, 0);
+      }
+
+      if (inputManager.driverB) {
+        robotMap.indexer.set(ControlMode.PercentOutput, -.15);
+      } else {
+        robotMap.indexer.set(ControlMode.PercentOutput, 0);
+      }
+
+      if (inputManager.driverX) {
+        robotMap.indexer.setSelectedSensorPosition(0);
+      }
+    System.out.println(robotMap.indexer.getSelectedSensorPosition());
+    System.out.println("Zero = " + robotMap.ballLimit[0].get());
+    System.out.println("One = " + robotMap.ballLimit[1].get());
 
     // shooter.handleInput();
     // shooter.autoIndex();

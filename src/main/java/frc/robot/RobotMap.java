@@ -102,6 +102,8 @@ public class RobotMap {
         driveLeft.setInverted(true);
         // driveRight.setInverted(true);
 
+        indexer.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
+
         turret.configFactoryDefault(kTimeoutMs);
         turret.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
         int pulseWidth = turret.getSensorCollection().getPulseWidthPosition();
