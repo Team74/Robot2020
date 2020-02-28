@@ -25,7 +25,7 @@ public class WaitAction implements Action {
 
     @Override
     public boolean isFinished() {
-        return (Timer.getFPGATimestamp() - startTime) >= runtime;
+        return (Timer.getFPGATimestamp() - startTime) >= runTime;
     }
 
     @Override
