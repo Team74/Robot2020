@@ -5,10 +5,12 @@ import edu.wpi.first.wpilibj.Timer;
 public class WaitAction implements Action {
 
     public double startTime;
-    private final double runtime;//This is in seconds
+    private final double runTime;//This is in seconds
+    private final double maxRunTime;
 
-    public WaitAction(double _runTime) {
-        runtime = _runTime;
+    public WaitAction(double maxRunTime, double runTime) {
+        this.maxRunTime = maxRunTime;
+        this.runTime = runTime;
     }
 
     @Override
