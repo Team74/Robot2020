@@ -53,6 +53,8 @@ public class Shooter implements Updateable {
 
     private int flywheelHold = 0;
     private boolean driverAhold = false;
+    private boolean driverBhold = false;
+    private boolean driverYhold = false;
     private int indexerHold = 0;
 
     private boolean hasHitLeft = false;
@@ -60,6 +62,8 @@ public class Shooter implements Updateable {
 
     private TurretState turretState = TurretState.Holding;
     private TurretControlState turretControlState = TurretControlState.PercentOutput;
+
+    private int ballCounter = 0;
 
     private NetworkTable limelight;
     private NetworkTableEntry tx, ty, ta, tv;
@@ -130,26 +134,27 @@ public class Shooter implements Updateable {
         }
 
         //Testing zeroing hood
-        if (inputManager.driverX) {
-            hoodState = HoodState.Zeroing;
-        }
+        // if (inputManager.driverX) {
+        //     hoodState = HoodState.Zeroing;
+        // }
 
         //Intake
-        if (inputManager.driverA && !intakeFrwd && !driverAhold) {
-            intakeFrwd = true;
-            driverAhold = true;
-        } else if (inputManager.driverA && intakeFrwd && !driverAhold) {
-            intakeFrwd = false;
+        if (inputManager.driverA && !driverAhold) {
+            intakeState = IntakeState.IntakeDown;
             driverAhold = true;
         } else if (!inputManager.driverA) {
             driverAhold = false;
-            intake.set(ControlMode.PercentOutput, 0);
         }
 
-        if (inputManager.driverB) {
-            intakeRev = true;
-        } else {
-            intakeRev = false;
+        if (inputManager.driverB && !driverBhold) {
+            intakeState = IntakeState.IntakeDownRev;
+            driverBhold = true;
+        } else if (!inputManager.driverB) {
+            driverBhold = false;
+        }
+
+        if (!inputManager.driverA && !inputManager.driverB) {
+            intakeState = IntakeState.IntakeUp;
         }
         //Turret & hood
         if (inputManager.opPOV != -1 && inputManager.opLeftTrigger < .85) {
@@ -165,6 +170,7 @@ public class Shooter implements Updateable {
         } else if (inputManager.opLeftTrigger > .85) {
             // turretState = 2;
             hoodState = HoodState.Tracking;
+            turretState = TurretState.Tracking;
         } else {
             if (turretState != TurretState.Zeroing) {
                 turretState = TurretState.Holding;
@@ -176,15 +182,21 @@ public class Shooter implements Updateable {
 
         //Limelight led control
         //Replace button with appropriate inputManager call
-        if (button && !isLedOn && !ledToggling) {
+        if (Robot.inputManager.driverX && !isLedOn && !ledToggling) {
             isLedOn = true;
             ledToggling = true;
-        } else if(button && isLedOn && !ledToggling) {
+        } else if(Robot.inputManager.driverX && isLedOn && !ledToggling) {
             isLedOn = false;
             ledToggling = true;
-        } else if (!button) {
+        } else if (!Robot.inputManager.driverX) {
             ledToggling = false;
         }
+
+        //   if (inputManager.driverA) {
+        //     Robot.robotMap.intake.set(ControlMode.PercentOutput, 1);
+        //   } else {
+        //     Robot.robotMap.intake.set(ControlMode.PercentOutput, 0);
+        //   }
 
         //Manual Index
         if (inputManager.opY && indexerHold == 0) {
@@ -202,6 +214,13 @@ public class Shooter implements Updateable {
         } else {
             shooterOn = false;
         }
+
+        if (inputManager.driverY && !driverYhold) {
+            ballCounter--;
+            driverYhold = true;
+        } else if (!inputManager.driverY && driverYhold) {
+            driverYhold = false;
+        }
     }
 
     public void update(double dt) {
@@ -216,39 +235,47 @@ public class Shooter implements Updateable {
             setLimelightLEDS(LimelightLEDState.Off);
         }
 
-        if (flywheelOn) {
-            setFlywheel(28000);
-        } else {
-            // setFlywheel(0);
-        }
-
         // System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
         // System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
-        switch (turretState) {
-            case RightSpin:
-                setTurret(-.25);
-                break;
-            case Holding:
-                setTurret(0);
-                break;
-            case LeftSpin:
-                setTurret(.25);
-                break;
-            case Tracking:
-                alignTurret();
-                break;
-            case Zeroing:
-                zeroTurret();
-                break;
-            default:
-                break;
-        }
 
         // System.out.println("Hood position " + hood.getSelectedSensorPosition(0));
         // System.out.println("Target Angle Vertical " + targetAngleVertical);
         // System.out.println("Hood Velcity " + hood.getSelectedSensorVelocity(0)); 
         // System.out.println("Hood Closed Loop Error " + hood.getClosedLoopError(0));       
         // System.out.println(hoodLimit.get());
+        System.out.println(ballCounter);
+
+        // flywheel();
+        index();
+        autoIndex();
+        // hood();
+        // turret();
+        // intake();
+        // shoot();
+
+        if (indexer.getSupplyCurrent() > Double.POSITIVE_INFINITY) {
+            indexer.set(ControlMode.PercentOutput, 0);
+        }
+    }
+
+    public void flywheel() {
+        if (flywheelOn) {
+            setFlywheel(28000);
+        } else {
+            // setFlywheel(0);
+        }
+    }
+
+    public void index() {
+        if (isAdvancing) {
+            indexer.set(ControlMode.PercentOutput, -.2);
+            isAdvancing = hasAdvanced();
+        } else {
+            indexer.set(ControlMode.PercentOutput, 0);
+        }
+    }
+
+    public void hood() {
         switch (hoodState) {
             case Raising:
                 // System.out.println("Hood up");
@@ -275,18 +302,27 @@ public class Shooter implements Updateable {
             default:
                 break;
         }
+    }
 
-        if (isAdvancing) {
-            indexer.set(ControlMode.PercentOutput, -.2);
-            // isAdvancing = hasAdvanced();
-        } else {
-            indexer.set(ControlMode.PercentOutput, 0);
-        }
-        intake();
-        shoot();
-
-        if (indexer.getSupplyCurrent() > Double.POSITIVE_INFINITY) {
-            indexer.set(ControlMode.PercentOutput, 0);
+    public void turret() {
+        switch (turretState) {
+            case RightSpin:
+                setTurret(-.25);
+                break;
+            case Holding:
+                setTurret(0);
+                break;
+            case LeftSpin:
+                setTurret(.25);
+                break;
+            case Tracking:
+                alignTurret();
+                break;
+            case Zeroing:
+                zeroTurret();
+                break;
+            default:
+                break;
         }
     }
 
@@ -295,30 +331,14 @@ public class Shooter implements Updateable {
             //Make sure that the intake is up, and off.
             case IntakeUp:
                 intake.set(ControlMode.PercentOutput, 0);
-
-                if (intakeFrwd) {
-                    intakeState = IntakeState.IntakeDown;
-                }
                 break;
             //deploy the intake
             case IntakeDown:
             intake.set(ControlMode.PercentOutput, 1.0);
-
-                if (indexerFull() && !intakeFrwd) {
-                    intakeState = IntakeState.IntakeUp;
-                } else if (intakeRev) {
-                    intakeState = IntakeState.IntakeDownRev;
-                }
                 break;
             //reverse the intake, once it is deployed
             case IntakeDownRev:
                 intake.set(ControlMode.PercentOutput, -1.0);
-                 
-                if (!intakeFrwd) {
-                    intakeState = IntakeState.IntakeUp;
-                } else if (!intakeRev) {
-                    intakeState = IntakeState.IntakeDown;
-                }
                 break;
             case Indexing: //Unknown if this is needed
                 break;
@@ -344,6 +364,7 @@ public class Shooter implements Updateable {
                     break;
                 }
                 uptake.set(ControlMode.PercentOutput, 1.0);
+                ballCounter--;
                 if (indexerHasBalls()) {
                     shootState = ShooterState.LoadBall;
                 } else if (!indexerHasBalls()) {
@@ -372,7 +393,8 @@ public class Shooter implements Updateable {
         switch (indexerState) {
             //checks for the first ball intook
             case NoBalls:
-                if(ballLimits[0].get() && intakeState == IntakeState.IntakeDown) {
+                if(ballLimits[0].get()) {
+                    ballCounter++;
                     indexerState = IndexerState.Rotate;
                 }
                 break;
@@ -390,39 +412,39 @@ public class Shooter implements Updateable {
                 if (indexerFull()) {
                     indexerState = IndexerState.StopRotating;
                     break;
-                }
-                //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
-                if ((!indexerFull() && ballLimits[0].get()) || (intakeState != IntakeState.IntakeDown && !ballLimits[3].get())) {
+                } else if ((!indexerFull() && ballLimits[0].get())) { //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
                     indexerState = IndexerState.Rotate;
+                    ballCounter++;
                     break;
+                } 
+                if (indexerFull() && ballLimits[0].get() && ballCounter < 5) {
+                    ballCounter++;
                 }
-                //ball in uptake pos and uptake empty
-                // if (!ballLimits[3].get()) {
-                //     indexerState = IndexerState.UptakeBall;
-                //     break;
-                // }
+                if (shooterOn && !ballLimits[1].get() && indexerHasBalls()) {
+                    indexerState = IndexerState.Rotate;
+                }
                 break;
             //uptakes a ball
-            // case UptakeBall:
+            case UptakeBall:
             //     uptake.set(ControlMode.PercentOutput, 100);
             //     if (hasPrepedBall()) {
             //         indexerState = IndexerState.StopUptake;
             //     }
-            //     break;
+                break;
             // //stops the uptake
-            // case StopUptake:
+            case StopUptake:
             //     if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
             //         indexerState = IndexerState.Rotate;
             //     } else {
             //         indexerState = IndexerState.NoBalls;
             //     }
                 
-            //     break;
+                break;
         }
     }
 
     private boolean indexerFull() {
-        if (ballLimits[0].get() && ballLimits[1].get() && ballLimits[2].get() && ballLimits[3].get() && ballLimits[4].get()) {
+        if (ballLimits[0].get() && ballLimits[1].get() /*&& ballLimits[2].get() && ballLimits[3].get() && ballLimits[4].get()*/) {
             return true;
         } else {
             return false;
@@ -430,7 +452,7 @@ public class Shooter implements Updateable {
     }
 
     private boolean indexerHasBalls() {
-        if (ballLimits[0].get() || ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get() || ballLimits[4].get()) {
+        if (ballCounter > 0/*ballLimits[0].get() || ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get() || ballLimits[4].get()*/) {
             return true;
         } else {
             return false;
@@ -537,7 +559,7 @@ public class Shooter implements Updateable {
     }
 
     private boolean hasAdvanced() {
-        return !indexerRotationLimit.get();
+        return indexerRotationLimit.get();
     }
 
     private boolean flywheelUpToSpeed(int targetSpeed) {
@@ -609,7 +631,7 @@ public class Shooter implements Updateable {
     }
 
     private void alignTurret() {
-        turretState = TurretState.Tracking;
+        // turretState = TurretState.Tracking;
         if ((validTargets == 0 || validTargets == Double.POSITIVE_INFINITY) || targetAngleHorizontal == Double.POSITIVE_INFINITY) {
             System.out.println("Error Align Shooter, Either no targets or recieving default value");
         }
@@ -657,6 +679,7 @@ public class Shooter implements Updateable {
         Off,
         Blinking;
     }
+
     
     public enum TurretState {
         Tracking,

@@ -24,7 +24,7 @@ public class TestAuton extends AutonBase {
 
         System.out.println("First action completed and second action started at: " + Timer.getFPGATimestamp());
 
-        runAction(new WaitAction(3.0));//Wait 3.0 seconds
+        // runAction(new WaitAction(3.0));//Wait 3.0 seconds
 
         System.out.println("Second action completed and third action started at: " + Timer.getFPGATimestamp());
 

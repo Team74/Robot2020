@@ -60,7 +60,7 @@ public class Robot extends TimedRobot {
       private static final long serialVersionUID = -99999;
       {
       add(inputManager);
-      add(drivebase);
+      //add(drivebase);
       add(shooter);
       }
     };
@@ -104,31 +104,31 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    // for(Updateable object : updateableObjects) {
-    //   object.update(0.0);
-    //   object.dashboard();
-    // }
-      inputManager.update(0);
-      shooter.update(0);
-      System.out.println("Hood limit" + robotMap.hoodLimit.get());
-      if (inputManager.driverA) {
-        robotMap.intake.set(ControlMode.PercentOutput, 1);
-      } else {
-        robotMap.intake.set(ControlMode.PercentOutput, 0);
-      }
+    for(Updateable object : updateableObjects) {
+      object.update(0.0);
+      object.dashboard();
+    }
+    //   inputManager.update(0);
+    //   shooter.update(0);
+    //   System.out.println("Hood limit" + robotMap.hoodLimit.get());
+    //   if (inputManager.driverA) {
+    //     robotMap.intake.set(ControlMode.PercentOutput, 1);
+    //   } else {
+    //     robotMap.intake.set(ControlMode.PercentOutput, 0);
+    //   }
 
-      if (inputManager.driverB) {
-        robotMap.indexer.set(ControlMode.PercentOutput, -.15);
-      } else {
-        robotMap.indexer.set(ControlMode.PercentOutput, 0);
-      }
+    //   if (inputManager.driverB) {
+    //     robotMap.indexer.set(ControlMode.PercentOutput, -.15);
+    //   } else {
+    //     robotMap.indexer.set(ControlMode.PercentOutput, 0);
+    //   }
 
-      if (inputManager.driverX) {
-        robotMap.indexer.setSelectedSensorPosition(0);
-      }
-    System.out.println(robotMap.indexer.getSelectedSensorPosition());
-    System.out.println("Zero = " + robotMap.ballLimit[0].get());
-    System.out.println("One = " + robotMap.ballLimit[1].get());
+    //   if (inputManager.driverX) {
+    //     robotMap.indexer.setSelectedSensorPosition(0);
+    //   }
+    // System.out.println(robotMap.indexer.getSelectedSensorPosition());
+    // System.out.println("Zero = " + robotMap.ballLimit[0].get());
+    // System.out.println("One = " + robotMap.ballLimit[1].get());
 
     // shooter.handleInput();
     // shooter.autoIndex();
