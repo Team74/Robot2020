@@ -4,26 +4,21 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Drivebase;
 import frc.robot.Drivebase.DriveState;
 
-public class DriveDistanceAction implements Action {
+public class StopAction implements Action {
 
     public final double startTime;
     public final double maxRunTime;
-    public final double targetDistanceIn;
 
     public final Drivebase driveBase;
 
-    public DriveDistanceAction(double maxRunTime, double targetDistanceIn) {
+    public StopAction(double maxRunTime) {
         driveBase = Drivebase.getInstance();
         startTime = Timer.getFPGATimestamp();
         this.maxRunTime = maxRunTime;
-        this.targetDistanceIn = targetDistanceIn;
     }
 
     public void start() {
-        driveBase.setDriveState(DriveState.DriveStraight);
-        driveBase.setAtTarget(false);
-        driveBase.setTargetDistance(this.targetDistanceIn);
-        driveBase.zeroDriveEncoders();
+        driveBase.setDriveState(DriveState.Teleop);
     }
 
     public void done() {
@@ -32,10 +27,10 @@ public class DriveDistanceAction implements Action {
 
     public boolean isFinished() {
         //check to see if we've covered the driven distance
-        return (driveBase.atTarget() || (maxRunTime <= (Timer.getFPGATimestamp() - startTime)));
+        return true;
     }
 
     public void update() {
-        // System.out.println("Updating drive distance action");
+        System.out.println("Updating stop action");
     }
 }

@@ -50,6 +50,9 @@ public class InputManager implements Updateable {
     public boolean opX = false;
     public boolean opY = false;
 
+    public boolean opStart = false;
+    public boolean opBack = false;
+
     public boolean opLeftBumper = false;
     public boolean opRightBumper = false;
 
@@ -100,6 +103,9 @@ public class InputManager implements Updateable {
         opB = mController1.getBButton();
         opX = mController1.getXButton();
         opY = mController1.getYButton();
+
+        opStart = mController1.getStartButton();
+        opBack = mController1.getBackButton();
 
         opLeftBumper = mController1.getBumper(Hand.kLeft);
         opRightBumper = mController1.getBumper(Hand.kRight);

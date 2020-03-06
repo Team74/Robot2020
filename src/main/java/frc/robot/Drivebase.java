@@ -22,12 +22,12 @@ public class Drivebase implements Updateable {
 
     private DriveState driveState = DriveState.Teleop;
 
-    private double autoTurnScalar = 0.5;
+    private double autoTurnScalar = 1.0/90.0;
     private double autoTurnDeadband = 0.5;
 
     //The value needed to convert from distance, to neo encoder ticks
     private double distanceConversionFactor = 1.0;
-    private double autoDistanceDeadband = 0.5;
+    private double autoDistanceDeadband = 50;
 
     private boolean atTarget = false;
 
@@ -49,7 +49,7 @@ public class Drivebase implements Updateable {
     }
 
     public Drivebase() {
-        inputManager = Robot.inputManager;
+        inputManager = InputManager.getInstance();
         robotMap = RobotMap.getInstance();
 
         leftMaster = robotMap.leftDriveMaster;
@@ -66,7 +66,7 @@ public class Drivebase implements Updateable {
         rightEncoder = rightMaster.getEncoder();
 
         leftController = leftMaster.getPIDController();
-        rightController = leftMaster.getPIDController();
+        rightController = rightMaster.getPIDController();
 
         leftMaster.setInverted(true);
         rightMaster.setInverted(false);
@@ -76,6 +76,23 @@ public class Drivebase implements Updateable {
         rightMaster.setIdleMode(IdleMode.kCoast);
         rightFollower.setIdleMode(IdleMode.kCoast);
 
+        leftController.setSmartMotionMaxAccel(500, drivePIDSlots.get("SmartMotion"));
+        leftController.setSmartMotionMaxVelocity(5000, drivePIDSlots.get("SmartMotion"));
+        leftController.setSmartMotionMinOutputVelocity(0, drivePIDSlots.get("SmartMotion"));
+
+        rightController.setSmartMotionMaxAccel(500, drivePIDSlots.get("SmartMotion"));
+        rightController.setSmartMotionMaxVelocity(5000, drivePIDSlots.get("SmartMotion"));
+        rightController.setSmartMotionMinOutputVelocity(0, drivePIDSlots.get("SmartMotion"));
+
+        leftController.setFF(1.0/5000.0);
+        leftController.setP(0.0);
+        leftController.setI(0.0);
+        leftController.setD(0.0);
+
+        rightController.setFF(1.0/5000.0);
+        rightController.setP(0.0);
+        rightController.setI(0.0);
+        rightController.setD(0.0);
 
         leftFollower.follow(leftMaster, false);
         rightFollower.follow(rightMaster, false);
@@ -95,7 +112,7 @@ public class Drivebase implements Updateable {
     }
 
     public void update(double dt) {
-        printDriebaseData();
+        // printDriebaseData();
         switch(driveState) {
             case Teleop:
                 if (inputManager.driverLeftBumper) {
@@ -104,21 +121,22 @@ public class Drivebase implements Updateable {
                     handleShift(ShiftState.High);
                 }
                 arcadeDrive(inputManager.driverLeftStickY, inputManager.driverRightStickX, true, (inputManager.driverTriggerRight > .85));
-                leftMaster.set(DriveCommands.leftMotorOutput);
-                rightMaster.set(DriveCommands.rightMotorOutput);
+                leftController.setReference(DriveCommands.leftMotorOutput, ControlType.kDutyCycle);
+                rightController.setReference(DriveCommands.rightMotorOutput, ControlType.kDutyCycle);
                 break;
             case DriveStraight:
                 leftController.setReference(DriveCommands.targetDistance, ControlType.kSmartMotion, drivePIDSlots.get("SmartMotion"));
                 rightController.setReference(DriveCommands.targetDistance, ControlType.kSmartMotion, drivePIDSlots.get("SmartMotion"));
+                //Subtract right because it's encoder is counting negavtive when we go foward when we are in position mode
                 this.setAtTarget(Math.abs(((leftEncoder.getPosition() + rightEncoder.getPosition()) / 2) - DriveCommands.targetDistance) <= autoDistanceDeadband);
                 break;
             case TurnAngle:
                 double heading = this.getHeading();
-                double headingDiff = heading + DriveCommands.targetHeading;
+                double headingDiff = heading - DriveCommands.targetHeading;
                 //CLamp output to the [-1.0, 1.0] range and apply a porpotionality constant
                 double output = Math.max(-1.0, Math.min(1.0, (autoTurnScalar * headingDiff)));
-                leftMaster.set(output);
-                rightMaster.set(-output);
+                leftController.setReference(output, ControlType.kDutyCycle);
+                rightController.setReference(-output, ControlType.kDutyCycle);
                 this.setAtTarget(Math.abs(headingDiff) <= autoTurnDeadband);
                 break;
             default:
@@ -140,7 +158,7 @@ public class Drivebase implements Updateable {
      * @return Bounded gyro angle
      */
     public double getHeading() {
-        return gyro.getAngle() % 360;
+        return gyro.getAngle();// % 360;
     }
 
     public void setAtTarget(boolean value) {
@@ -234,10 +252,10 @@ public class Drivebase implements Updateable {
 
     public void printDriebaseData() {
         System.out.println("Left Position: " + leftEncoder.getPosition());
-        System.out.println("Right Position: " + rightEncoder.getPosition() );
+        System.out.println("Right Position: " + rightEncoder.getPosition());
         System.out.println("Left Velocity: " + leftEncoder.getVelocity());
         System.out.println("Right Velocity: " + rightEncoder.getVelocity());
-        System.out.println("Heading: " + getHeading());
+        // System.out.println("Heading: " + getHeading());
     }
 
     public static class DriveCommands {

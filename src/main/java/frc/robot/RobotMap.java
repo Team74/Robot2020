@@ -110,7 +110,9 @@ public class RobotMap {
         turret.configNominalOutputReverse(0);
         turret.configPeakOutputForward(1.00);
         turret.configPeakOutputReverse(-1.00);
-
+        turret.selectProfileSlot(0, 0);
+		turret.configMotionCruiseVelocity(Constants.kTurretMaxVelocity, kTimeoutMs);
+		turret.configMotionAcceleration(Constants.kTurretMaxAcceleration, kTimeoutMs);
         turret.config_kF(0, Constants.kTurretF, kTimeoutMs);
         turret.config_kP(0, Constants.kTurretP, kTimeoutMs);
         turret.config_kI(0, Constants.kTurretI, kTimeoutMs);

@@ -18,6 +18,8 @@ import frc.robot.Shooter.HoodState;
 import frc.robot.Shooter.LimelightLEDState;
 import frc.robot.Shooter.TurretState;
 import frc.robot.autonomous.AutonRunner;
+import frc.robot.autonomous.modes.GetOffLineMode;
+import frc.robot.autonomous.modes.ShootInitalBalls;
 import frc.robot.autonomous.modes.TestAuton;
 
 /**
@@ -76,8 +78,10 @@ public class Robot extends TimedRobot {
     // robotMap.gearShift.set(Value.kForward);
     drivebase.zeroGyro();
     drivebase.zeroDriveEncoders();
-    autonRunner.setAuton(new TestAuton());
+    shooter.setTurretState(TurretState.Zeroing);
+    shooter.setHoodState(HoodState.Zeroing);
     timer.start();
+    autonRunner.setAuton(new ShootInitalBalls());
     autonRunner.start();
   }
 
@@ -95,8 +99,6 @@ public class Robot extends TimedRobot {
     autonRunner.stop();
     // robotMap.gearShift.set(Value.kForward);
     drivebase.setDriveState(DriveState.Teleop);
-    shooter.setTurretState(TurretState.Zeroing);
-    shooter.setHoodState(HoodState.Zeroing);
     robotMap.indexer.setSelectedSensorPosition(0);
   }
 

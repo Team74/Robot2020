@@ -24,9 +24,9 @@ public class Constants {
 
     public static final int kTurretMinimumRotation = 250;
     public static final int kTurretMaxRotation = 14000;
-    public static final int kTurretMaxVelocity = 0;
-    public static final int kTurretMaxAcceleration = 0;
-    public static final double kTurretF = 0.0;
+    public static final int kTurretMaxVelocity = 750;
+    public static final int kTurretMaxAcceleration = 2000;
+    public static final double kTurretF = 1.023;
     public static final double kTurretP = 0.0;
     public static final double kTurretI = 0.0;
     public static final double kTurretD = 0.0;

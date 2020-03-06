@@ -5,7 +5,7 @@ Right Stick =
 
 A = Intake Fwd Hold
 B = Intake Rev Hold
-X = Limelight Toggle
+X = Intake Off
 Y =
 
 POV
@@ -26,7 +26,7 @@ OPERATOR:
 Left Stick =
 Right Stick =
 
-A =
+A = Limelight Toggle
 B = Rev Index
 X = Flywheel toggle
 Y = Manual Index
@@ -38,6 +38,8 @@ POV
 270 = Turret Left
 
 Left Trigger = Align Shooter
-Left Bumper = Set Hood to Position 0
+Left Bumper = Set Hood to Position 0 Implement Stil
 Right Trigger = Shoot
-Right Bumper =  Set Hood to Position 3000
+Right Bumper =  Set Hood to Position 3000 Implement Stil
+
+Start: Override isFlywheelUpToSpeed

@@ -3,6 +3,7 @@ package frc.robot.autonomous.actions;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.Constants;
 import frc.robot.Shooter;
+import frc.robot.Shooter.LimelightLEDState;
 import frc.robot.Shooter.TurretState;
 
 public class ScoreBallsAction implements Action {
@@ -21,28 +22,40 @@ public class ScoreBallsAction implements Action {
     }
 
     public void start() {
-
+        System.out.println("Start method of score balls action");
+        shooter.setIsShooterOn(false);
+        shooter.setIsIndexerOn(false, false);
+        shooter.setLimelightLEDS(LimelightLEDState.On);
     }
 
     public void done() {
+        System.out.println("Done method of score balls action");
         shooter.setIsShooterOn(false);
-        shooter.setIsInxerOn(false, false);
+        shooter.setIsIndexerOn(false, false);
+        shooter.setLimelightLEDS(LimelightLEDState.Off);
+        shooter.setTurretState(TurretState.Holding);
     }
 
     public boolean isFinished() {
-        //check to see if we've covered the driven distance
-        return (maxRunTime <= (Timer.getFPGATimestamp() - startTime));
+        //check elapsed time
+        double timeDiff = Timer.getFPGATimestamp() - startTime;
+        return (maxRunTime <= timeDiff);
     }
 
     public void update() {
+        shooter.setLimelightLEDS(LimelightLEDState.On);
         if(shooter.isShooterAligned()) {
+            System.out.println("Shoooter is aligned");
             shooter.setIsShooterOn(true);
-            if (shooter.isFlywheelUpToSpeed(Constants.kFlywheelSpeed)) {
-                shooter.setIsInxerOn(true, false);
+            if (shooter.isFlywheelUpToSpeed(Constants.kFlywheelSpeed, false)) {
+                System.out.println("Flywheel up to speed");
+                shooter.setIsIndexerOn(true, false);
             } else {
-                shooter.setIsInxerOn(false, false);
+                System.out.println("Flywheel getting up to speed");
+                shooter.setIsIndexerOn(false, false);
             }
         } else {
+            // System.out.println("Aligning turret");
             shooter.setTurretState(TurretState.Tracking);
         }
     }

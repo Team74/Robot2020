@@ -24,13 +24,15 @@ public class TestAuton extends AutonBase {
 
         System.out.println("First action completed and second action started at: " + Timer.getFPGATimestamp());
 
-        // runAction(new WaitAction(3.0));//Wait 3.0 seconds
+        runAction(new DriveDistanceAction(Double.POSITIVE_INFINITY, 1000));//Drive 1000 encoder ticks foward
 
         System.out.println("Second action completed and third action started at: " + Timer.getFPGATimestamp());
 
         runAction(new TurnAngleAction(Double.POSITIVE_INFINITY, 0.0));//Turn 90s to the left, back to the starting heading
         
         System.out.println("Third action completed at: " + Timer.getFPGATimestamp());
+
+        runAction(new StopAction(Double.POSITIVE_INFINITY));
 
     }
 }

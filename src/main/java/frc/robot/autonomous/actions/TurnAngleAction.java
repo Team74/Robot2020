@@ -30,10 +30,12 @@ public class TurnAngleAction implements Action {
     }
 
     public boolean isFinished() {
-        return (maxRunTime <= (Timer.getFPGATimestamp() - startTime) || driveBase.atTarget());
+        boolean isFinished = (maxRunTime <= (Timer.getFPGATimestamp() - startTime) || driveBase.atTarget());
+        // System.out.println("Checking is turn angle action finished" );
+        return isFinished;
     }
 
     public void update() {
-        System.out.println("Updating turn angle action");
+        // System.out.println("Updating turn angle action");
     }
 }
