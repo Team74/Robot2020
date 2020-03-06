@@ -1,7 +1,9 @@
 package frc.robot.autonomous.actions;
 
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants;
 import frc.robot.Shooter;
+import frc.robot.Shooter.TurretState;
 
 public class ScoreBallsAction implements Action {
 
@@ -23,14 +25,25 @@ public class ScoreBallsAction implements Action {
     }
 
     public void done() {
-
+        shooter.setIsShooterOn(false);
+        shooter.setIsInxerOn(false, false);
     }
 
     public boolean isFinished() {
         //check to see if we've covered the driven distance
-        return true;
+        return (maxRunTime <= (Timer.getFPGATimestamp() - startTime));
     }
 
     public void update() {
+        if(shooter.isShooterAligned()) {
+            shooter.setIsShooterOn(true);
+            if (shooter.isFlywheelUpToSpeed(Constants.kFlywheelSpeed)) {
+                shooter.setIsInxerOn(true, false);
+            } else {
+                shooter.setIsInxerOn(false, false);
+            }
+        } else {
+            shooter.setTurretState(TurretState.Tracking);
+        }
     }
 }

@@ -10,10 +10,12 @@ package frc.robot;
 import java.util.ArrayList;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Drivebase.DriveState;
 import frc.robot.Shooter.HoodState;
+import frc.robot.Shooter.LimelightLEDState;
 import frc.robot.Shooter.TurretState;
 import frc.robot.autonomous.AutonRunner;
 import frc.robot.autonomous.modes.TestAuton;
@@ -37,6 +39,7 @@ public class Robot extends TimedRobot {
   private Vision mVision;
 
   private AutonRunner autonRunner;
+  private Timer timer;
 
   @Override
   public void robotInit() {
@@ -47,7 +50,11 @@ public class Robot extends TimedRobot {
     shooter = Shooter.getInstance();
     climber = Climber.getInstance();
 
+    shooter.setLimelightLEDS(LimelightLEDState.Off);
+
     autonRunner = AutonRunner.getInstance();
+    timer = new Timer();
+
 
     updateableObjects = new ArrayList<>() {
       private static final long serialVersionUID = -99999;
@@ -70,12 +77,17 @@ public class Robot extends TimedRobot {
     drivebase.zeroGyro();
     drivebase.zeroDriveEncoders();
     autonRunner.setAuton(new TestAuton());
+    timer.start();
     autonRunner.start();
   }
 
   @Override
   public void autonomousPeriodic() {
-
+    //No handleInput in autonomous
+    for(Updateable object : updateableObjects) {
+      object.update(0.0);
+      object.dashboard();
+    }
   }
 
   @Override
@@ -92,6 +104,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     for(Updateable object : updateableObjects) {
+      object.handleInput();
       object.update(0.0);
       object.dashboard();
     }

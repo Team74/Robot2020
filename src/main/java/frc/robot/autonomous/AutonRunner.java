@@ -18,6 +18,7 @@ public class AutonRunner {
     }
 
     public void setAuton(AutonBase _auton) {
+        System.out.println("Setting auto mode");
         auton = _auton;
         thread = new Thread(new AutonThread() {
             @Override
@@ -30,12 +31,14 @@ public class AutonRunner {
     }
 
     public void start() {
+        System.out.println("Starting auto mode in auto runner");
         if (thread != null) {
             thread.start();
         }
     }
 
     public void stop() {
+        System.out.println("Stopping auto mode in auto runner");
         if (auton != null) {
             auton.stop();
         }

@@ -65,6 +65,13 @@ public class InputManager implements Updateable {
         return kInstance;
     }
 
+    /**
+     * Nothing here, just to statisfy updateable interface
+     */
+    public void handleInput() {
+
+    }
+
     public void update(double dt) {
         driverLeftStickY = mController0.getY(Hand.kLeft);
         driverLeftStickX = mController0.getX(Hand.kLeft);

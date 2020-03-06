@@ -22,7 +22,7 @@ public class Climber implements Updateable {
 
     public Climber() {
         climbMotor = Robot.robotMap.climber;
-        // balenceMotor = Robot.robotMap.cliberBalence;
+        // balenceMotor = Robot.robotMap.climberBalance;
         inputManager = Robot.inputManager;
     }
 
@@ -62,6 +62,9 @@ public class Climber implements Updateable {
             //    climbMotor.set(ControlMode.PercentOutput, 0);
                 climbMotor.set(0);
                 break;
+            default:
+                System.out.println("Hit default state on ClimberState switch");
+                break;
         }
 
         // switch(balenceState) {
@@ -73,6 +76,22 @@ public class Climber implements Updateable {
         //         break;
         //     case 0:
         //         balenceMotor.set(ControlMode.PercentOutput, 0);
+        //             break;
+        //         default:
+        //             System.out.println("Hit default state on BalanceState switch");
+        //             break;
         // }
+    }
+    
+    public static enum ClimberState {
+        Holding,
+        Raising,
+        Lowering;
+    }
+
+    public static enum BalanceState {
+        Balanced,
+        MoveLeft,
+        MoveRight;
     }
 }

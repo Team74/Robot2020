@@ -41,35 +41,34 @@ public class Shooter implements Updateable {
             put("target_height", 89.75);
         }
     };
-    private Boolean flywheelOn = false;
-    private IntakeState intakeState = IntakeState.IntakeUp;
     private HoodState hoodState = HoodState.Zeroing;
     private HoodControlState hoodControlState = HoodControlState.PercentOutput;
-    private boolean isAdvancing = false;
-    private ShooterState shootState = ShooterState.NotShooting;
-    private ShooterControlState shooterControlState = ShooterControlState.VelocityPID;
-    private Boolean shooterOn = false;
-    private Boolean shooterAlign = false;
-    private IndexerState indexerState = IndexerState.NoBalls;
+    private boolean isHoodAligned = false;
+    private final int hoodAlignmentDeadband = 100;
 
+    private IndexerState indexerState = IndexerState.NoBalls;
+    private boolean isAdvancing = false;
+    private boolean isAdvancingRev = false;
+
+    private ShooterState shooterState = ShooterState.NotShooting;
+    private ShooterControlState shooterControlState = ShooterControlState.VelocityPID;
+    private Boolean isShooterOn = false;
+    private Boolean isShooterAligned = false;
+
+    private IntakeState intakeState = IntakeState.IntakeUp;
     private boolean intakeFrwd = false;
     private boolean intakeRev = false;
 
-    private int flywheelHold = 0;
     private boolean driverAhold = false;
     private boolean driverBhold = false;
     private boolean driverYhold = false;
-    private int indexerHold = 0;
-
-    private boolean isAdvancingRev = false;
-
-    private boolean hasHitLeft = false;
-    private final double turretAlignmentDeadband = 0.05;
-
+    private int ballCounter = 0;
+    
     private TurretState turretState = TurretState.Zeroing;
     private TurretControlState turretControlState = TurretControlState.PercentOutput;
-
-    private int ballCounter = 0;
+    private boolean hasHitLeft = false;
+    private boolean isTurretAligned = false;
+    private final double turretAlignmentDeadband = 0.05;
 
     private NetworkTable limelight;
     private NetworkTableEntry tx, ty, ta, tv;
@@ -120,28 +119,14 @@ public class Shooter implements Updateable {
         SmartDashboard.putBoolean("Gear", Robot.inputManager.opY);
         SmartDashboard.putNumber("Indexer Current", indexer.getSupplyCurrent());
 
-        SmartDashboard.putBoolean("Index 1", Robot.robotMap.ballLimit[0].get());
-        SmartDashboard.putBoolean("Index 2", Robot.robotMap.ballLimit[1].get());
-        SmartDashboard.putBoolean("Index 3", Robot.robotMap.ballLimit[2].get());
-        SmartDashboard.putBoolean("Index 4", Robot.robotMap.ballLimit[3].get());
-        SmartDashboard.putBoolean("Index 5", Robot.robotMap.ballLimit[4].get());
-        
-        SmartDashboard.putBoolean("Flywheel", flywheelOn);
-    }
-
-    public void handleInput() {
-        //Flywheel
-        if (inputManager.opX) {
-            if (flywheelOn && flywheelHold == 0) {
-              flywheelOn = false;
-            } else if (flywheelHold == 0) {
-              flywheelOn = true;
-            }
-            flywheelHold++;
-        } else {
-            flywheelHold = 0;
+        // SmartDashboard.putBoolean("Index 1", Robot.robotMap.ballLimit[0].get());
+        // SmartDashboard.putBoolean("Index 2", Robot.robotMap.ballLimit[1].get());
+        // SmartDashboard.putBoolean("Index 3", Robot.robotMap.ballLimit[2].get());
+        // SmartDashboard.putBoolean("Index 4", Robot.robotMap.ballLimit[3].get());
+        // SmartDashboard.putBoolean("Index 5", Robot.robotMap.ballLimit[4].get());
         }
 
+    public void handleInput() {
         //Intake
         //Fix/Clean up Intake
         if (inputManager.driverA && !driverAhold) {
@@ -175,7 +160,6 @@ public class Shooter implements Updateable {
                 turretState = TurretState.LeftSpin;
             }
         } else if (inputManager.opLeftTrigger > .85) {
-            // hoodState = HoodState.Tracking;
             turretState = TurretState.Tracking;
         } else {
             if (turretState != TurretState.Zeroing) {
@@ -186,39 +170,31 @@ public class Shooter implements Updateable {
             }
         }
         //Limelight led control
-        if (Robot.inputManager.driverX && !isLedOn && !ledToggling) {
+        if (inputManager.driverX && !isLedOn && !ledToggling) {
             isLedOn = true;
             ledToggling = true;
-        } else if(Robot.inputManager.driverX && isLedOn && !ledToggling) {
+        } else if(inputManager.driverX && isLedOn && !ledToggling) {
             isLedOn = false;
             ledToggling = true;
-        } else if (!Robot.inputManager.driverX) {
+        } else if (!inputManager.driverX) {
             ledToggling = false;
         }
 
         //Manual Index
-        if (inputManager.opY && indexerHold == 0) {
-            isAdvancing = true;
-            indexerHold++;
-        } else if (!inputManager.opY) {
-            isAdvancing = false;
-            indexerHold = 0;
-        }
-
-        if (inputManager.opB && indexerHold == 0) {
-            isAdvancingRev = true;
-            indexerHold++;
-        } else if (!inputManager.opB) {
-            isAdvancingRev = false;
-            indexerHold = 0;
+        if (inputManager.opY) {
+            setIsInxerOn(true, false);
+        } else if (inputManager.opB) {
+            setIsInxerOn(true, true);
+        } else {
+            setIsInxerOn(false, false);
         }
 
         //shooter
         double triggerPressed = .85;
         if (inputManager.opRightTrigger > triggerPressed) {
-            shooterOn = true;
+            setIsShooterOn(true);
         } else {
-            shooterOn = false;
+            setIsShooterOn(false);
         }
 
         // if (inputManager.driverY && !driverYhold) {
@@ -229,28 +205,33 @@ public class Shooter implements Updateable {
         // }
     }
 
+    /**
+     * Call this functioning entering Teleop to clear any erroneous states during autoShutDown
+     */
+    public void resestState() {
+        shooterState = ShooterState.NotShooting;
+        shooterControlState = ShooterControlState.VelocityPID;
+
+        intakeState = IntakeState.IntakeUp;
+        intakeFrwd = false;
+        intakeRev = false;
+    }
+
     public void update(double dt) {
-        handleInput();
         updateLimelightData();
         zeroTurretEncoder();
         zeroHoodEncoder();
+
+        printTurretData();
+        // printHoodData();
+        // printIndexerData();
+        // printShooterData();
 
         if(isLedOn) {
             setLimelightLEDS(LimelightLEDState.On);
         } else {
             setLimelightLEDS(LimelightLEDState.Off);
         }
-
-        // System.out.println("Turret position " + turret.getSelectedSensorPosition(0));
-        // System.out.println("Turret Velcity " + turret.getSelectedSensorVelocity(0));
-        // System.out.println("Turret Limit: " + turretLimit.get());
-        System.out.println("Hood position " + hood.getSelectedSensorPosition(0));
-        // System.out.println("Target Angle Vertical " + targetAngleVertical);
-        // System.out.println("Hood Velcity " + hood.getSelectedSensorVelocity(0)); 
-        System.out.println(hoodLimit.get());
-        // System.out.println(ballCounter);
-        System.out.println("Flywheel Speed: "+ flywheelMaster.getSelectedSensorVelocity(0));
-        System.out.println("Index Pose Limit" + indexerRotationLimit.get());
 
         index();
         //autoIndex();
@@ -297,6 +278,7 @@ public class Shooter implements Updateable {
                 zeroHood();
                 break;
             case Tracking:
+                setHoodControlState(HoodControlState.MotionMagic);
                 alignHood();
                 break;
             default:
@@ -347,22 +329,22 @@ public class Shooter implements Updateable {
     }
 
     public void shoot() {
-        switch (shootState) {
+        switch (shooterState) {
             case NotShooting:
-                if (shooterOn && flywheelUpToSpeed(28000)) {
-                    shootState = ShooterState.ShootBall;
-                } else if (shooterOn && !flywheelUpToSpeed(28000)) {
-                    shootState = ShooterState.FlywheelOn;
-                } else if (!shooterOn) {
-                    shootState = ShooterState.FlywheelOff;
+                if (isShooterOn && isFlywheelUpToSpeed(Constants.kFlywheelSpeed)) {
+                    shooterState = ShooterState.ShootBall;
+                } else if (isShooterOn && !isFlywheelUpToSpeed(Constants.kFlywheelSpeed)) {
+                    shooterState = ShooterState.FlywheelOn;
+                } else if (!isShooterOn) {
+                    shooterState = ShooterState.FlywheelOff;
                 }
                 break;
             case ShootBall:
-                if (!shooterOn) {
-                    shootState = ShooterState.NotShooting;
+                if (!isShooterOn) {
+                    shooterState = ShooterState.NotShooting;
                     uptake.set(ControlMode.PercentOutput, 0.0);
                     break;
-                } else if (shooterOn) {
+                } else if (isShooterOn) {
                     if(!indexerRotationLimit.get()) {
                         uptake.set(ControlMode.PercentOutput, 1.0);
                     } else {
@@ -378,18 +360,19 @@ public class Shooter implements Updateable {
                 break;
             case LoadBall:  
                 if (true) {
-                    shootState = ShooterState.NotShooting;
+                    shooterState = ShooterState.NotShooting;
                 }
                 break;
             case FlywheelOn:
+                //Not using Constants.kFlywheelSpeed because PIDF loop NEEDS tuning, DO NOT CHANGE
                 setFlywheel(27000);
-                if (flywheelUpToSpeed(28000)) {
-                    shootState = ShooterState.ShootBall;
+                if (isFlywheelUpToSpeed(Constants.kFlywheelSpeed)) {
+                    shooterState = ShooterState.ShootBall;
                 }
                 break;
             case FlywheelOff:
                 setFlywheel(0);
-                shootState = ShooterState.NotShooting;
+                shooterState = ShooterState.NotShooting;
                 break;
         }
     }
@@ -405,10 +388,10 @@ public class Shooter implements Updateable {
                 break;
             //rotates the indexer
             case Rotate:
-                isAdvancing = true;
+                setIsInxerOn(true, false);
                 if (hasAdvanced()) {
                     indexerState = IndexerState.StopRotating;
-                    isAdvancing = false;
+                    setIsInxerOn(false, false);
                 }
                 break;
             //stops rotating
@@ -425,7 +408,7 @@ public class Shooter implements Updateable {
                 if (indexerFull() && ballLimits[0].get() && ballCounter < 5) {
                     ballCounter++;
                 }
-                if (shooterOn && !ballLimits[1].get() && indexerHasBalls()) {
+                if (isShooterOn && !ballLimits[1].get() && indexerHasBalls()) {
                     indexerState = IndexerState.Rotate;
                 }
                 break;
@@ -567,11 +550,7 @@ public class Shooter implements Updateable {
         shooterControlState = newState;
     }
 
-    private boolean hasAdvanced() {
-        return indexerRotationLimit.get();
-    }
-
-    private boolean flywheelUpToSpeed(int targetSpeed) {
+    public boolean isFlywheelUpToSpeed(int targetSpeed) {
         int currentSpeed = flywheelMaster.getSelectedSensorVelocity(0);
         return (currentSpeed >= (targetSpeed - 1000) && currentSpeed <= (targetSpeed + 1000));
     }
@@ -585,7 +564,7 @@ public class Shooter implements Updateable {
         // System.out.println("Tv: " + validTargets);
     }
 
-    private void setLimelightLEDS(LimelightLEDState newState) {
+    public void setLimelightLEDS(LimelightLEDState newState) {
         switch(newState) {
             case On:
                 limelight.getEntry("ledMode").setNumber(3);
@@ -602,10 +581,10 @@ public class Shooter implements Updateable {
         }
     }
 
-    private void printTurretEncoderData() {
-        int selSenPos = turret.getSelectedSensorPosition(0);
-		int pulseWidthWithoutOverflows = turret.getSensorCollection().getPulseWidthPosition() & 0xFFF;
-		// System.out.println("pulseWidPos:" + pulseWidthWithoutOverflows + "   =>    " + "selSenPos:" + selSenPos);
+    private void printHoodData() {
+        System.out.println("Hood Position: " + hood.getSelectedSensorPosition(0));
+        System.out.println("Hood Velocity: " + hood.getSelectedSensorVelocity(0));
+        System.out.println("Hood Limit: " + hoodLimit.get());
     }
 
     private void zeroHood() {
@@ -624,6 +603,33 @@ public class Shooter implements Updateable {
         }
     }
 
+    public boolean isHoodAligned() {
+        return isHoodAligned;
+    }
+
+    public void setIsHoodAligned(boolean isAligned) {
+        isHoodAligned = isAligned;
+    }
+    
+    private void alignHood() {
+        double hoodPositionTicks = (-1250 * targetAngleVertical) + 12500;
+        if (hoodPositionTicks < Constants.kHoodMinimumHeight) {
+            hoodPositionTicks = Constants.kHoodMinimumHeight;
+        } else if (hoodPositionTicks > Constants.kHoodMaxHeight) {
+            hoodPositionTicks = Constants.kHoodMaxHeight;
+        }
+        setHood(hoodPositionTicks);
+    }
+
+    private void printTurretData() {
+        int selSenPos = turret.getSelectedSensorPosition(0);
+		int pulseWidthWithoutOverflows = turret.getSensorCollection().getPulseWidthPosition() & 0xFFF;
+        // System.out.println("pulseWidPos:" + pulseWidthWithoutOverflows + "   =>    " + "selSenPos:" + selSenPos);
+        System.out.println("Turret Position: " + turret.getSelectedSensorPosition(0));
+        System.out.println("Turret Velocity: " + turret.getSelectedSensorVelocity(0));        
+        System.out.println("Turret Limit: " + turretLimit.get());
+    }
+
     private void zeroTurret() {
         if (!turretLimit.get()) {
             setTurret(-0.20);
@@ -637,6 +643,14 @@ public class Shooter implements Updateable {
         if (turretLimit.get()) {
             turret.setSelectedSensorPosition(0, 0, 30);
         }
+    }
+
+    public boolean isTurretAligned() {
+        return isTurretAligned;
+    }
+
+    public void setIsTurretAligned(boolean isAligned) {
+        isTurretAligned = isAligned;
     }
 
     private void alignTurret() {
@@ -661,35 +675,64 @@ public class Shooter implements Updateable {
             setTurretControlState(TurretControlState.PercentOutput);
         } else {
             if (Math.abs(targetAngleHorizontal) > turretAlignmentDeadband) {
-                System.out.println("Porportional Control");
                 double spinPower = targetAngleHorizontal * (-1.0/54.0);
                 if (Math.abs(spinPower) < 0.075) {
                     spinPower = Math.copySign(0.075, spinPower);
                 }
                 setTurret(spinPower);
-            } else 
+                setIsTurretAligned(false);
+            } else { 
                 setTurret(0.0);
+                setIsTurretAligned(true);
             }
-    }
-
-    private void alignHood() {
-        double hoodPositionTicks = (-1250 * targetAngleVertical) + 12500;
-        if (hoodPositionTicks < Constants.kHoodMinimumHeight) {
-            hoodPositionTicks = Constants.kHoodMinimumHeight;
-        } else if (hoodPositionTicks > Constants.kHoodMaxHeight) {
-            hoodPositionTicks = Constants.kHoodMaxHeight;
         }
-        setHood(hoodPositionTicks);
     }
 
-    public enum LimelightLEDState {
+    private void printShooterData() {
+        System.out.println("Flywheel Speed: " + flywheelMaster.getSelectedSensorVelocity(0));
+    }
+
+    public void setIsShooterOn(boolean isOn) {
+        isShooterOn = isOn;
+    }
+
+    public boolean isShooterAligned() {
+        return isTurretAligned() && isHoodAligned();
+    }
+
+    private void printIndexerData() {
+        System.out.println("Indexer Position: " + indexer.getSelectedSensorPosition(0));
+        System.out.println("Indexer Velocity: " + indexer.getSelectedSensorVelocity(0));
+        System.out.println("Indexer Centered Limit: " + indexerRotationLimit.get());
+        System.out.println("Indexer Ball Sensor 1: " + ballLimits[0].get());
+        System.out.println("Indexer Ball Sensor 2: " + ballLimits[1].get());
+    }
+
+    private boolean hasAdvanced() {
+        return indexerRotationLimit.get();
+    }
+
+    public void setIsInxerOn(boolean isOn, boolean isRev) {
+        if (isRev) {
+            isAdvancingRev = isOn;
+            isAdvancing = false;
+        } else if (!isRev) {
+            isAdvancing = isOn;
+            isAdvancingRev = false;
+        } else {
+            isAdvancing = false;
+            isAdvancingRev = false;
+        }
+    }
+
+    public static enum LimelightLEDState {
         On,
         Off,
         Blinking;
     }
 
     
-    public enum TurretState {
+    public static enum TurretState {
         Tracking,
         Holding,
         ReadyToShoot,
@@ -699,7 +742,7 @@ public class Shooter implements Updateable {
         Zeroing;
     }
 
-    public enum HoodState {
+    public static enum HoodState {
         Raising,
         Lowering,
         Manual,
@@ -708,13 +751,18 @@ public class Shooter implements Updateable {
         Zeroing;
     }
 
-    public enum HoodControlState {
+    public static enum HoodControlState {
         PercentOutput,
         MotionMagic,
         PositionPID;
     }
 
-    public enum IndexerState {
+    public static enum HoodPositions {
+        InitiationLine,
+        EveryWhereElse;
+    }
+
+    public static enum IndexerState {
         NoBalls,
         Rotate,
         Manual,
@@ -723,7 +771,7 @@ public class Shooter implements Updateable {
         StopUptake;
     }
 
-    public enum IntakeState {
+    public static enum IntakeState {
         IntakeUp,
         IntakeDown,
         IntakeDownRev,
@@ -731,7 +779,7 @@ public class Shooter implements Updateable {
         Indexing; //We dont know if this will be needed, not currently called
     }
 
-    public enum ShooterState {
+    public static enum ShooterState {
         NotShooting,
         Manual,
         FlywheelOn,
@@ -740,12 +788,12 @@ public class Shooter implements Updateable {
         LoadBall;
     }
 
-    public enum ShooterControlState {
+    public static enum ShooterControlState {
         PercentOutput,
         VelocityPID;
     }
 
-    public enum TurretControlState {
+    public static enum TurretControlState {
         PercentOutput,
         MotionMagic;
     }

@@ -83,12 +83,19 @@ public class Drivebase implements Updateable {
         gyro = robotMap.navX;
     }
 
+    /**
+     * Look into refatoring to seperate out inputs into here at a later date.
+     */
+    public void handleInput() {
+
+    }
+
     public void dashboard() {
         
     }
 
     public void update(double dt) {
-
+        printDriebaseData();
         switch(driveState) {
             case Teleop:
                 if (inputManager.driverLeftBumper) {
@@ -196,12 +203,12 @@ public class Drivebase implements Updateable {
         leftMotorOutput = throttle - wheel;
         rightMotorOutput = throttle + wheel;
         
-        double maxMotorOutput = Math.max(Math.abs(leftMotorOutput), Math.abs(rightMotorOutput));
-        double normalizedLeftMotorOutput = leftMotorOutput / maxMotorOutput;
-        double normalizedRightMotorOutput = rightMotorOutput / maxMotorOutput;
+        // double maxMotorOutput = Math.max(Math.abs(leftMotorOutput), Math.abs(rightMotorOutput));
+        // double normalizedLeftMotorOutput = Math.copySign(leftMotorOutput / maxMotorOutput, leftMotorOutput);
+        // double normalizedRightMotorOutput = Math.copySign(leftMotorOutput / maxMotorOutput, leftMotorOutput);
 
-        DriveCommands.leftMotorOutput = normalizedLeftMotorOutput;
-        DriveCommands.rightMotorOutput = normalizedRightMotorOutput;
+        DriveCommands.leftMotorOutput = leftMotorOutput;
+        DriveCommands.rightMotorOutput = rightMotorOutput;
     }
     
     public void handleShift(ShiftState newState) {
@@ -225,6 +232,14 @@ public class Drivebase implements Updateable {
         driveState = newState;
     }
 
+    public void printDriebaseData() {
+        System.out.println("Left Position: " + leftEncoder.getPosition());
+        System.out.println("Right Position: " + rightEncoder.getPosition() );
+        System.out.println("Left Velocity: " + leftEncoder.getVelocity());
+        System.out.println("Right Velocity: " + rightEncoder.getVelocity());
+        System.out.println("Heading: " + getHeading());
+    }
+
     public static class DriveCommands {
         public static double leftMotorOutput;
         public static double rightMotorOutput;
@@ -233,12 +248,12 @@ public class Drivebase implements Updateable {
         public static double targetDistance; //Inches 
     }
 
-    public enum ShiftState {
+    public static enum ShiftState {
         High,
         Low;
     }
 
-    public enum DriveState {
+    public static enum DriveState {
         PathFollowing,
         DriveStraight,
         TurnAngle,

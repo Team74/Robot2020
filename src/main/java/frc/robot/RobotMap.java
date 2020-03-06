@@ -38,17 +38,18 @@ public class RobotMap {
     
 
     public CANSparkMax climber = new CANSparkMax(11, CANSparkMaxLowLevel.MotorType.kBrushless);
-    // public TalonSRX cliberBalence= new TalonSRX(0);
+    // public TalonSRX climberBalance= new TalonSRX(0);
     //find CAN id
 
     public DigitalInput hoodLimit = new DigitalInput(0);
     public DigitalInput turretLimit = new DigitalInput(1);
     public DigitalInput indexerRotationCheck = new DigitalInput(4);
     public DigitalInput [] ballLimit = {new DigitalInput(2), 
-                                        new DigitalInput(3),
-                                        new DigitalInput(5), 
-                                        new DigitalInput(6), 
-                                        new DigitalInput(7)};
+                                        new DigitalInput(3)
+                                        // new DigitalInput(5), 
+                                        // new DigitalInput(6), 
+                                        // new DigitalInput(7)
+                                        };
 
     // public Compressor compressor = new Compressor(0);
     // public DoubleSolenoid gearShift = new DoubleSolenoid(49, 0, 1);

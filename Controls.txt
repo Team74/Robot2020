@@ -38,6 +38,6 @@ POV
 270 = Turret Left
 
 Left Trigger = Align Shooter
-Left Bumper =
+Left Bumper = Set Hood to Position 0
 Right Trigger = Shoot
-Right Bumper =
+Right Bumper =  Set Hood to Position 3000
