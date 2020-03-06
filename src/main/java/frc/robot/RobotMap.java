@@ -1,6 +1,8 @@
 package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.FollowerType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.kauailabs.navx.frc.AHRS;
@@ -26,23 +28,24 @@ public class RobotMap {
     public CANSparkMax rightDriveMaster = new CANSparkMax(12, CANSparkMaxLowLevel.MotorType.kBrushless);
     public CANSparkMax rightDriveFollower = new CANSparkMax(15, CANSparkMaxLowLevel.MotorType.kBrushless);
 
-    public VictorSPX intake = new VictorSPX(7);         
-    public TalonSRX flywheel = new TalonSRX(17);
+    public VictorSPX intake = new VictorSPX(7);
+    public TalonSRX flywheelMaster = new TalonSRX(17);
+    public VictorSPX flywheelFollower = new VictorSPX(8);
     public TalonSRX turret = new TalonSRX(18);
     public TalonSRX hood = new TalonSRX(20);  
     public TalonSRX indexer = new TalonSRX(21);
     public VictorSPX uptake = new VictorSPX(23); 
     
 
-    // public TalonSRX climber = new TalonSRX(0);
+    public CANSparkMax climber = new CANSparkMax(11, CANSparkMaxLowLevel.MotorType.kBrushless);
     // public TalonSRX cliberBalence= new TalonSRX(0);
     //find CAN id
 
     public DigitalInput hoodLimit = new DigitalInput(0);
     public DigitalInput turretLimit = new DigitalInput(1);
-    public DigitalInput indexerRotationLimit = new DigitalInput(2);
-    public DigitalInput [] ballLimit = {new DigitalInput(3), 
-                                        new DigitalInput(4), 
+    public DigitalInput indexerRotationCheck = new DigitalInput(4);
+    public DigitalInput [] ballLimit = {new DigitalInput(2), 
+                                        new DigitalInput(3),
                                         new DigitalInput(5), 
                                         new DigitalInput(6), 
                                         new DigitalInput(7)};
@@ -57,19 +60,25 @@ public class RobotMap {
     public AHRS navX = new AHRS(SPI.Port.kMXP, (byte)60);
 
     private RobotMap() {
-        flywheel.configFactoryDefault(kTimeoutMs);
-        flywheel.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
-        flywheel.setSensorPhase(true);
-        flywheel.setInverted(false);
-        flywheel.configNominalOutputForward(0);
-        flywheel.configNominalOutputReverse(0);
-        flywheel.configPeakOutputForward(1.00);
-        flywheel.configPeakOutputReverse(0);
+        flywheelMaster.configFactoryDefault(kTimeoutMs);
+        flywheelMaster.setNeutralMode(NeutralMode.Coast);
+        flywheelMaster.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
+        flywheelMaster.setSensorPhase(true);
+        flywheelMaster.setInverted(false);
+        flywheelMaster.configNominalOutputForward(0);
+        flywheelMaster.configNominalOutputReverse(0);
+        flywheelMaster.configPeakOutputForward(1.00);
+        flywheelMaster.configPeakOutputReverse(0);
 
-        flywheel.config_kF(0, Constants.kFlywheelF, kTimeoutMs);
-        flywheel.config_kP(0, Constants.kFlywheelP, kTimeoutMs);
-        flywheel.config_kI(0, Constants.kFlywheelI, kTimeoutMs);
-        flywheel.config_kD(0, Constants.kFlywheelD, kTimeoutMs);
+        flywheelMaster.config_kF(0, Constants.kFlywheelF, kTimeoutMs);
+        flywheelMaster.config_kP(0, Constants.kFlywheelP, kTimeoutMs);
+        flywheelMaster.config_kI(0, Constants.kFlywheelI, kTimeoutMs);
+        flywheelMaster.config_kD(0, Constants.kFlywheelD, kTimeoutMs);
+
+        flywheelFollower.setNeutralMode(NeutralMode.Coast);
+        flywheelFollower.configFactoryDefault(kTimeoutMs);
+        flywheelFollower.setInverted(false);
+        flywheelFollower.follow(flywheelMaster, FollowerType.PercentOutput);
 
         hood.configFactoryDefault(kTimeoutMs);
         hood.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
@@ -86,9 +95,6 @@ public class RobotMap {
         hood.config_kP(0, Constants.kHoodP, kTimeoutMs);
         hood.config_kI(0, Constants.kHoodI, kTimeoutMs);
         hood.config_kD(0, Constants.kHoodD, kTimeoutMs);
-
-        // driveLeft.setInverted(true);
-        // driveRight.setInverted(true);
 
         indexer.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
 
@@ -110,6 +116,7 @@ public class RobotMap {
         turret.config_kD(0, Constants.kTurretD, kTimeoutMs);
 
         uptake.setInverted(true);
+        uptake.setNeutralMode(NeutralMode.Brake);
     }
 
     public static RobotMap getInstance() {

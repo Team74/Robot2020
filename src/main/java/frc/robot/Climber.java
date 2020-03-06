@@ -2,11 +2,12 @@ package frc.robot;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.BaseMotorController;
+import com.revrobotics.CANSparkMax;
 
 public class Climber implements Updateable {
     private static Climber kInstance = null;
     private InputManager inputManager;
-    private BaseMotorController climbMotor;
+    private CANSparkMax climbMotor;
     private BaseMotorController balenceMotor;
 
     private int climberState = 0;
@@ -20,7 +21,7 @@ public class Climber implements Updateable {
     }
 
     public Climber() {
-        // climbMotor = Robot.robotMap.climber;
+        climbMotor = Robot.robotMap.climber;
         // balenceMotor = Robot.robotMap.cliberBalence;
         inputManager = Robot.inputManager;
     }
@@ -47,27 +48,31 @@ public class Climber implements Updateable {
     }
 
     public void update(double dt) {
+        handleInput();
         switch(climberState) {
             case 1:
-                climbMotor.set(ControlMode.PercentOutput, -50);
+                // climbMotor.set(ControlMode.PercentOutput, -.75);
+                climbMotor.set(-.75);
                 break;
             case -1:
-                climbMotor.set(ControlMode.PercentOutput, 50);
+                // climbMotor.set(ControlMode.PercentOutput, .75);
+                climbMotor.set(.75);
                 break;
             case 0:
-               climbMotor.set(ControlMode.PercentOutput, 0);
+            //    climbMotor.set(ControlMode.PercentOutput, 0);
+                climbMotor.set(0);
                 break;
         }
 
-        switch(balenceState) {
-            case 1:
-                balenceMotor.set(ControlMode.PercentOutput, 50);
-                break;
-            case -1:
-                balenceMotor.set(ControlMode.PercentOutput, -50);
-                break;
-            case 0:
-                balenceMotor.set(ControlMode.PercentOutput, 0);
-        }
+        // switch(balenceState) {
+        //     case 1:
+        //         balenceMotor.set(ControlMode.PercentOutput, 50);
+        //         break;
+        //     case -1:
+        //         balenceMotor.set(ControlMode.PercentOutput, -50);
+        //         break;
+        //     case 0:
+        //         balenceMotor.set(ControlMode.PercentOutput, 0);
+        // }
     }
 }

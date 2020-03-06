@@ -3,6 +3,7 @@ package frc.robot;
 import java.util.HashMap;
 
 import com.revrobotics.*;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.kauailabs.navx.frc.AHRS;
 
 public class Drivebase implements Updateable {
@@ -70,6 +71,12 @@ public class Drivebase implements Updateable {
         leftMaster.setInverted(true);
         rightMaster.setInverted(false);
 
+        leftMaster.setIdleMode(IdleMode.kCoast);
+        leftFollower.setIdleMode(IdleMode.kCoast);
+        rightMaster.setIdleMode(IdleMode.kCoast);
+        rightFollower.setIdleMode(IdleMode.kCoast);
+
+
         leftFollower.follow(leftMaster, false);
         rightFollower.follow(rightMaster, false);
 
@@ -89,7 +96,7 @@ public class Drivebase implements Updateable {
                 } else if (inputManager.driverRightBumper) {
                     handleShift(ShiftState.High);
                 }
-                arcadeDrive(-inputManager.driverRightStickX, inputManager.driverRightStickY, true, (inputManager.driverTriggerRight > .85));
+                arcadeDrive(inputManager.driverLeftStickY, inputManager.driverRightStickX, true, (inputManager.driverTriggerRight > .85));
                 leftMaster.set(DriveCommands.leftMotorOutput);
                 rightMaster.set(DriveCommands.rightMotorOutput);
                 break;
@@ -149,7 +156,7 @@ public class Drivebase implements Updateable {
         // Square the inputs (while preserving the sign) to increase fine control
         // while permitting full power.
         if (squareInputs) {
-            throttle = Math.copySign(throttle * throttle, throttle);
+            throttle = Math.copySign(throttle * throttle *throttle, throttle);
             wheel = Math.copySign(wheel * wheel, wheel);
         }
         double tempDriveScalar = driveScalar;
@@ -164,30 +171,37 @@ public class Drivebase implements Updateable {
         double leftMotorOutput;
         double rightMotorOutput;
 
-        double maxInput = Math.copySign(Math.max(Math.abs(throttle), Math.abs(wheel)), throttle);
+        // double maxInput = Math.copySign(Math.max(Math.abs(throttle), Math.abs(wheel)), throttle);
 
-        if (throttle >= 0.0) {
-            // First quadrant, else second quadrant
-            if (wheel >= 0.0) {
-                leftMotorOutput = maxInput;
-                rightMotorOutput = throttle - wheel;
-            } else {
-                leftMotorOutput = throttle + wheel;
-                rightMotorOutput = maxInput;
-            }
-        } else {
-            // Third quadrant, else fourth quadrant
-            if (wheel >= 0.0) {
-                leftMotorOutput = throttle + wheel;
-                rightMotorOutput = maxInput;
-            } else {
-                leftMotorOutput = maxInput;
-                rightMotorOutput = throttle - wheel;
-            }
-        }
+        // if (throttle >= 0.0) {
+        //     // First quadrant, else second quadrant
+        //     if (wheel >= 0.0) {
+        //         leftMotorOutput = maxInput;
+        //         rightMotorOutput = throttle - wheel;
+        //     } else {
+        //         leftMotorOutput = throttle + wheel;
+        //         rightMotorOutput = maxInput;
+        //     }
+        // } else {
+        //     // Third quadrant, else fourth quadrant
+        //     if (wheel >= 0.0) {
+        //         leftMotorOutput = throttle + wheel;
+        //         rightMotorOutput = maxInput;
+        //     } else {
+        //         leftMotorOutput = maxInput;
+        //         rightMotorOutput = throttle - wheel;
+        //     }
+        // }
 
-        DriveCommands.leftMotorOutput = leftMotorOutput;
-        DriveCommands.rightMotorOutput = rightMotorOutput;
+        leftMotorOutput = throttle - wheel;
+        rightMotorOutput = throttle + wheel;
+        
+        double maxMotorOutput = Math.max(Math.abs(leftMotorOutput), Math.abs(rightMotorOutput));
+        double normalizedLeftMotorOutput = leftMotorOutput / maxMotorOutput;
+        double normalizedRightMotorOutput = rightMotorOutput / maxMotorOutput;
+
+        DriveCommands.leftMotorOutput = normalizedLeftMotorOutput;
+        DriveCommands.rightMotorOutput = normalizedRightMotorOutput;
     }
     
     public void handleShift(ShiftState newState) {

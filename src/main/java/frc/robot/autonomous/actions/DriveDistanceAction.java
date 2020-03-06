@@ -36,5 +36,6 @@ public class DriveDistanceAction implements Action {
     }
 
     public void update() {
+        System.out.println("Updating drive distance action");
     }
 }

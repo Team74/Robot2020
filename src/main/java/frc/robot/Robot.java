@@ -9,17 +9,14 @@ package frc.robot;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-//import jdk.internal.util.xml.impl.Input;
 import frc.robot.Drivebase.DriveState;
 import frc.robot.Shooter.HoodState;
 import frc.robot.Shooter.TurretState;
+import frc.robot.autonomous.AutonRunner;
+import frc.robot.autonomous.modes.TestAuton;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -29,39 +26,36 @@ import frc.robot.Shooter.TurretState;
  * project.
  */
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private ArrayList<Updateable> updateableObjects;
 
-  ArrayList<Updateable> updateableObjects;
+  public static RobotMap robotMap;
+  public static InputManager inputManager;
 
-  static RobotMap robotMap;
-  static InputManager inputManager;
+  private Drivebase drivebase;
+  private Climber climber;
+  private Shooter shooter;
+  private Vision mVision;
 
-  static Drivebase drivebase;
-  static Climber climber;
-  static Shooter shooter;
-  static Vision mVision;
+  private AutonRunner autonRunner;
 
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
-
     robotMap = RobotMap.getInstance();
 
     inputManager = InputManager.getInstance();
     drivebase = Drivebase.getInstance();
     shooter = Shooter.getInstance();
+    climber = Climber.getInstance();
+
+    autonRunner = AutonRunner.getInstance();
 
     updateableObjects = new ArrayList<>() {
       private static final long serialVersionUID = -99999;
       {
-      add(inputManager);
-      //add(drivebase);
-      add(shooter);
+        add(inputManager);
+        add(climber);
+        add(drivebase);
+        add(shooter);
       }
     };
   }
@@ -72,28 +66,21 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
     // robotMap.gearShift.set(Value.kForward);
-    System.out.println("Auto selected: " + m_autoSelected);
     drivebase.zeroGyro();
     drivebase.zeroDriveEncoders();
+    autonRunner.setAuton(new TestAuton());
+    autonRunner.start();
   }
 
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
+
   }
 
   @Override
   public void teleopInit() {
+    autonRunner.stop();
     // robotMap.gearShift.set(Value.kForward);
     drivebase.setDriveState(DriveState.Teleop);
     shooter.setTurretState(TurretState.Zeroing);
@@ -108,30 +95,6 @@ public class Robot extends TimedRobot {
       object.update(0.0);
       object.dashboard();
     }
-    //   inputManager.update(0);
-    //   shooter.update(0);
-    //   System.out.println("Hood limit" + robotMap.hoodLimit.get());
-    //   if (inputManager.driverA) {
-    //     robotMap.intake.set(ControlMode.PercentOutput, 1);
-    //   } else {
-    //     robotMap.intake.set(ControlMode.PercentOutput, 0);
-    //   }
-
-    //   if (inputManager.driverB) {
-    //     robotMap.indexer.set(ControlMode.PercentOutput, -.15);
-    //   } else {
-    //     robotMap.indexer.set(ControlMode.PercentOutput, 0);
-    //   }
-
-    //   if (inputManager.driverX) {
-    //     robotMap.indexer.setSelectedSensorPosition(0);
-    //   }
-    // System.out.println(robotMap.indexer.getSelectedSensorPosition());
-    // System.out.println("Zero = " + robotMap.ballLimit[0].get());
-    // System.out.println("One = " + robotMap.ballLimit[1].get());
-
-    // shooter.handleInput();
-    // shooter.autoIndex();
   }
 
   @Override

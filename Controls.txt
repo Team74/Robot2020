@@ -3,16 +3,16 @@ DRIVER:
 Left Stick =
 Right Stick =
 
-A =
-B = 
-X = 
+A = Intake Fwd Hold
+B = Intake Rev Hold
+X = Limelight Toggle
 Y =
 
 POV
-0 =
+0 = Climber Up
 90 =
 180 =
-270 =
+270 = Cliber Down
 
 Left Trigger =
 Left Bumper =
@@ -27,17 +27,17 @@ Left Stick =
 Right Stick =
 
 A =
-B = 
-X = 
-Y =
+B = Rev Index
+X = Flywheel toggle
+Y = Manual Index
 
 POV
-0 =
-90 =
-180 =
-270 =
+0 = Hood Up
+90 = Turret Right
+180 = Hood Down
+270 = Turret Left
 
-Left Trigger =
+Left Trigger = Align Shooter
 Left Bumper =
-Right Trigger =
+Right Trigger = Shoot
 Right Bumper =

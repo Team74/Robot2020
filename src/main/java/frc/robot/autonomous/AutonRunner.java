@@ -1,11 +1,20 @@
 package frc.robot.autonomous;
 
 public class AutonRunner {
+    private static AutonRunner kInstance;
+
     private AutonBase auton;
     private Thread thread = null;
 
     private AutonRunner() {
 
+    }
+
+    public static AutonRunner getInstance() {
+        if (kInstance == null) {
+            kInstance = new AutonRunner();
+        }
+        return kInstance;
     }
 
     public void setAuton(AutonBase _auton) {

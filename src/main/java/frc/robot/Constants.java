@@ -2,10 +2,10 @@ package frc.robot;
 
 public class Constants {
 
-    public static final double kFlywheelF = 0.036535714285;
-    public static final double kFlywheelP = 0.0;
+    public static final double kFlywheelF = 0.0372;
+    public static final double kFlywheelP = 0.01;
     public static final double kFlywheelI = 0.0;
-    public static final double kFlywheelD = 0.0;
+    public static final double kFlywheelD = 0.1;
 
 
     public static final int kHoodMinimumHeight = 0;
@@ -17,9 +17,12 @@ public class Constants {
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
 
+    public static final int kHoodInitiationLinePosition = 3000;
+    public static final int kHoodTrenchPosition = 0;
 
-    public static final long kTurretMinimumRotation = 250;
-    public static final long kTurretMaxRotation = 14000;
+
+    public static final int kTurretMinimumRotation = 250;
+    public static final int kTurretMaxRotation = 14000;
     public static final int kTurretMaxVelocity = 0;
     public static final int kTurretMaxAcceleration = 0;
     public static final double kTurretF = 0.0;

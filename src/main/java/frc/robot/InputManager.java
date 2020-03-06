@@ -39,8 +39,11 @@ public class InputManager implements Updateable {
     public int driverPOV = -1;
 
     //operator buttons
-
+    public double opLeftStickY = 0;
     public double opLeftStickX = 0;
+    public double opRightStickY = 0;
+    public double opRightStickX = 0;
+
 
     public boolean opA = false;
     public boolean opB = false;
@@ -81,7 +84,10 @@ public class InputManager implements Updateable {
         
         driverPOV = mController0.getPOV();
 
-        opLeftStickX = mController1.getX(Hand.kLeft);
+        opLeftStickY = mController1.getX(Hand.kLeft);
+        opLeftStickX = mController0.getY(Hand.kLeft);
+        opRightStickY = mController0.getX(Hand.kRight);
+        opRightStickX = mController0.getY(Hand.kRight);
 
         opA = mController1.getAButton();
         opB = mController1.getBButton();

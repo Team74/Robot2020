@@ -34,6 +34,6 @@ public class TurnAngleAction implements Action {
     }
 
     public void update() {
-
+        System.out.println("Updating turn angle action");
     }
 }
