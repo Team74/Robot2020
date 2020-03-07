@@ -20,6 +20,7 @@ public class DriveDistanceAction implements Action {
     }
 
     public void start() {
+        System.out.println("Start Method of Drive Distance Action");
         driveBase.setDriveState(DriveState.DriveStraight);
         driveBase.setAtTarget(false);
         driveBase.setTargetDistance(this.targetDistanceIn);
@@ -27,7 +28,7 @@ public class DriveDistanceAction implements Action {
     }
 
     public void done() {
-
+        System.out.println("Done Method of Drive Distance Action");
     }
 
     public boolean isFinished() {

@@ -22,7 +22,9 @@ public class ShootInitalBalls extends AutonBase {
 
         runAction(new ScoreBallsAction(10.0, 3));//Score First 3 balls
 
-        runAction(new DriveDistanceAction(Double.POSITIVE_INFINITY, -100));
+        System.out.println("First Action Finished Second Action Scarted");
+
+        runAction(new DriveDistanceAction(Double.POSITIVE_INFINITY, -90.0));//Drive 75 Encoder Ticks Straight fowards
 
         runAction(new StopAction(Double.POSITIVE_INFINITY));
 

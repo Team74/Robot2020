@@ -120,6 +120,7 @@ public class RobotMap {
         turret.config_kI(0, Constants.kTurretI, kTimeoutMs);
         turret.config_kD(0, Constants.kTurretD, kTimeoutMs);
 
+        uptake.configFactoryDefault();
         uptake.setInverted(true);
         uptake.setNeutralMode(NeutralMode.Brake);
     }

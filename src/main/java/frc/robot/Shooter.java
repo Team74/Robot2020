@@ -51,6 +51,8 @@ public class Shooter implements Updateable {
     private boolean isAdvancingRev = false;
     private boolean centering = false;
     private boolean centered = false;
+    private int uptakeTimer = 0;
+    private final int timeOn = 10;
 
     private ShooterState shooterState = ShooterState.NotShooting;
     private ShooterControlState shooterControlState = ShooterControlState.VelocityPID;
@@ -123,11 +125,8 @@ public class Shooter implements Updateable {
         SmartDashboard.putBoolean("Gear", Robot.inputManager.opY);
         SmartDashboard.putNumber("Indexer Current", indexer.getSupplyCurrent());
 
-        SmartDashboard.putBoolean("Ball Loaded", Robot.robotMap.ballLimit[0].get());
-        SmartDashboard.putBoolean("Shot Ready", Robot.robotMap.ballLimit[1].get());
-        // SmartDashboard.putBoolean("Index 3", Robot.robotMap.ballLimit[2].get());
-        // SmartDashboard.putBoolean("Index 4", Robot.robotMap.ballLimit[3].get());
-        // SmartDashboard.putBoolean("Index 5", Robot.robotMap.ballLimit[4].get());
+        SmartDashboard.putBoolean("Ball Loaded(2)", isBallLoaded());
+        SmartDashboard.putBoolean("Shot Ready(3)", isShotReady());
         SmartDashboard.putNumber("Flywheel", flywheelMaster.getSelectedSensorVelocity(0));
         SmartDashboard.putBoolean("LED ON", isLedOn);
         SmartDashboard.putBoolean("Is Shooter Up To Speed", isFlywheelUpToSpeed(Constants.kFlywheelSpeed, false));
@@ -137,6 +136,9 @@ public class Shooter implements Updateable {
         SmartDashboard.putBoolean("Hood Limit", hoodLimit.get());
         SmartDashboard.putBoolean("Turret Limit", turretLimit.get());
         SmartDashboard.putNumber("Turret Encoder", turret.getSelectedSensorPosition(0));
+        SmartDashboard.putNumber("Indexer Encoder", indexer.getSelectedSensorPosition(0));
+        SmartDashboard.putNumber("Indexer Velocity", indexer.getSelectedSensorVelocity(0));
+        SmartDashboard.putBoolean("Is Indexer Jammed", isIndexerJammed());
         }
 
     public void handleInput() {
@@ -201,18 +203,18 @@ public class Shooter implements Updateable {
         }
 
         //Manual Index
-        if (inputManager.opY) {
-            setIsIndexerOn(true, false);
-            centered = false;
-        } else if (inputManager.opB) {
-            setIsIndexerOn(true, true);
-            centered = false;
-        } else if (!centered) {
-            setIsIndexerOn(false, false);
-            centerIndexer();
-        } else {
-            setIsIndexerOn(false, false);
-        }
+        // if (inputManager.opY) {
+        //     setIsIndexerOn(true, false);
+        //     centered = false;
+        // } else if (inputManager.opB) {
+        //     setIsIndexerOn(true, true);
+        //     centered = false;
+        // } else if (!centered) {
+        //     setIsIndexerOn(false, false);
+        //     centerIndexer();
+        // } else {
+        //     setIsIndexerOn(false, false);
+        // }
 
         //shooter
         double triggerPressed = .85;
@@ -259,7 +261,7 @@ public class Shooter implements Updateable {
         }
 
         index();
-        //autoIndex();
+        autoIndex();
         hood();
         turret();
         intake();
@@ -268,14 +270,37 @@ public class Shooter implements Updateable {
 
     public void index() {
             if (isAdvancing && !isAdvancingRev && !centering) {
-                indexer.set(ControlMode.PercentOutput, -0.22);
+                indexer.set(ControlMode.PercentOutput, -0.4);
             } else if (!isAdvancing && isAdvancingRev && !centering) {
-                indexer.set(ControlMode.PercentOutput, 0.22);
+                indexer.set(ControlMode.PercentOutput, 0.4);
             } else if (centering) {
                 indexer.set(ControlMode.PercentOutput, -0.22);
             } else {
                 indexer.set(ControlMode.PercentOutput, 0.0);
             }            
+    }
+
+    public void autoIndex() {
+        if (inputManager.opB && !isBallLoaded()) {
+                setIsIndexerOn(true, true);
+                centered = false;
+        } else if (isBallLoaded() && !isShotReady() && centered) {
+            setIsIndexerOn(true, false);
+            centered = false;
+        } else if (!isShotReady() && centered && isFlywheelUpToSpeed(Constants.kFlywheelSpeed, inputManager.opY)) {
+            setIsIndexerOn(true, false);
+            centered = false;
+        } else if (isShotReady() && centered) {
+            setIsIndexerOn(false, false);
+        } else if (false) { // Auto unjamming
+            setIsIndexerOn(true, true);
+            centered = false;
+        } else if (!centered) {
+            setIsIndexerOn(false, false);
+            centerIndexer();
+        } else {
+            setIsIndexerOn(false, false);
+        }
     }
 
     public void hood() {
@@ -376,8 +401,10 @@ public class Shooter implements Updateable {
                 } else if (isShooterOn) {
                     if(hasAdvanced()) {
                         uptake.set(ControlMode.PercentOutput, 1.0);
+                        // uptakeTimer++;
                     } else {
                         uptake.set(ControlMode.PercentOutput, 0.0);
+                        // uptakeTimer = 0;
                     }
                 }
                 // ballCounter--;
@@ -394,7 +421,7 @@ public class Shooter implements Updateable {
                 break;
             case FlywheelOn:
                 //Not using Constants.kFlywheelSpeed because PIDF loop NEEDS tuning, DO NOT CHANGE
-                setFlywheel(20000);
+                setFlywheel(21000);
                 if (isShooterOn && isFlywheelUpToSpeed(Constants.kFlywheelSpeed, inputManager.opStart)) {
                     shooterState = ShooterState.ShootBall;
                 } else if (!isShooterOn) {
@@ -408,63 +435,64 @@ public class Shooter implements Updateable {
         }
     }
 
-    public void autoIndex() {
-        switch (indexerState) {
-            //checks for the first ball intook
-            case NoBalls:
-                if(ballLimits[0].get()) {
-                    ballCounter++;
-                    indexerState = IndexerState.Rotate;
-                }
-                break;
-            //rotates the indexer
-            case Rotate:
-                setIsIndexerOn(true, false);
-                if (hasAdvanced()) {
-                    indexerState = IndexerState.StopRotating;
-                    setIsIndexerOn(false, false);
-                }
-                break;
-            //stops rotating
-            case StopRotating: 
-                //no places left and uptake ready
-                if (indexerFull()) {
-                    indexerState = IndexerState.StopRotating;
-                    break;
-                } else if ((!indexerFull() && ballLimits[0].get())) { //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
-                    indexerState = IndexerState.Rotate;
-                    ballCounter++;
-                    break;
-                } 
-                if (indexerFull() && ballLimits[0].get() && ballCounter < 5) {
-                    ballCounter++;
-                }
-                if (isShooterOn && !ballLimits[1].get() && indexerHasBalls()) {
-                    indexerState = IndexerState.Rotate;
-                }
-                break;
-            //uptakes a ball
-            case UptakeBall:
-            //     uptake.set(ControlMode.PercentOutput, 100);
-            //     if (hasPrepedBall()) {
-            //         indexerState = IndexerState.StopUptake;
-            //     }
-                break;
-            // //stops the uptake
-            case StopUptake:
-            //     if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
-            //         indexerState = IndexerState.Rotate;
-            //     } else {
-            //         indexerState = IndexerState.NoBalls;
-            //     }
+
+    // // public void autoIndex() {
+    // //     switch (indexerState) {
+    // //         //checks for the first ball intook
+    // //         case NoBalls:
+    // //             if(ballLimits[0].get()) {
+    // //                 ballCounter++;
+    // //                 indexerState = IndexerState.Rotate;
+    // //             }
+    // //             break;
+    // //         //rotates the indexer
+    // //         case Rotate:
+    // //             setIsIndexerOn(true, false);
+    // //             if (hasAdvanced()) {
+    // //                 indexerState = IndexerState.StopRotating;
+    // //                 setIsIndexerOn(false, false);
+    // //             }
+    // //             break;
+    // //         //stops rotating
+    // //         case StopRotating: 
+    // //             //no places left and uptake ready
+    // //             if (indexerFull()) {
+    // //                 indexerState = IndexerState.StopRotating;
+    // //                 break;
+    // //             } else if ((!indexerFull() && ballLimits[0].get())) { //If the indexer is not full and there is a ball in the intake pos, stop intakeing and ball not under uptake
+    // //                 indexerState = IndexerState.Rotate;
+    // //                 ballCounter++;
+    // //                 break;
+    // //             } 
+    // //             if (indexerFull() && ballLimits[0].get() && ballCounter < 5) {
+    // //                 ballCounter++;
+    // //             }
+    // //             if (isShooterOn && !ballLimits[1].get() && indexerHasBalls()) {
+    // //                 indexerState = IndexerState.Rotate;
+    // //             }
+    // //             break;
+    // //         //uptakes a ball
+    // //         case UptakeBall:
+    // //         //     uptake.set(ControlMode.PercentOutput, 100);
+    // //         //     if (hasPrepedBall()) {
+    // //         //         indexerState = IndexerState.StopUptake;
+    // //         //     }
+    // //             break;
+    // //         // //stops the uptake
+    // //         case StopUptake:
+    // //         //     if (ballLimits[0].get() ||ballLimits[1].get() || ballLimits[2].get() || ballLimits[3].get()) {
+    // //         //         indexerState = IndexerState.Rotate;
+    // //         //     } else {
+    // //         //         indexerState = IndexerState.NoBalls;
+    // //         //     }
                 
-                break;
-            case Manual:
-                break;
-            default:
-                break;
-        }
-    }
+    //             break;
+    //         case Manual:
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 
     private boolean indexerFull() {
         if (ballLimits[0].get() && ballLimits[1].get() /*&& ballLimits[2].get() && ballLimits[3].get() && ballLimits[4].get()*/) {
@@ -754,6 +782,27 @@ public class Shooter implements Updateable {
         } else if (!hasAdvanced()) {
             centering = true;
         }
+    }
+
+    public boolean isBallLoaded() {
+        return !ballLimits[0].get();
+    }
+
+    public boolean isShotReady() {
+        return !ballLimits[1].get();
+    }
+
+    public boolean isIndexerJammed() {
+        if (isAdvancing) {
+            if (indexer.getSupplyCurrent() > 2.0) {
+                return true;
+            }
+        } else if (isAdvancingRev) {
+            if (indexer.getSupplyCurrent() > 2.0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void setIsIndexerOn(boolean isOn, boolean isReverse) {

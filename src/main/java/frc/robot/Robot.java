@@ -19,7 +19,6 @@ import frc.robot.Shooter.LimelightLEDState;
 import frc.robot.Shooter.TurretState;
 import frc.robot.autonomous.AutonRunner;
 import frc.robot.autonomous.modes.*;
-import frc.robot.autonomous.modes.TestAuton;
 
 /**
  * The VM is configured to automatically run this class, and to call the
