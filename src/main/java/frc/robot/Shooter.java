@@ -50,6 +50,7 @@ public class Shooter implements Updateable {
     private boolean isAdvancing = false;
     private boolean isAdvancingRev = false;
     private boolean centering = false;
+    private boolean centered = false;
 
     private ShooterState shooterState = ShooterState.NotShooting;
     private ShooterControlState shooterControlState = ShooterControlState.VelocityPID;
@@ -130,15 +131,16 @@ public class Shooter implements Updateable {
         SmartDashboard.putNumber("Flywheel", flywheelMaster.getSelectedSensorVelocity(0));
         SmartDashboard.putBoolean("LED ON", isLedOn);
         SmartDashboard.putBoolean("Is Shooter Up To Speed", isFlywheelUpToSpeed(Constants.kFlywheelSpeed, false));
-        SmartDashboard.putBoolean("Is Indexer Centered", !indexerRotationLimit.get());
+        SmartDashboard.putBoolean("Is Indexer Centered", hasAdvanced());
         SmartDashboard.putBoolean("Is Shooter Aligned", isShooterAligned());
         SmartDashboard.putNumber("Hood Encoder", hood.getSelectedSensorPosition(0));
         SmartDashboard.putBoolean("Hood Limit", hoodLimit.get());
+        SmartDashboard.putBoolean("Turret Limit", turretLimit.get());
+        SmartDashboard.putNumber("Turret Encoder", turret.getSelectedSensorPosition(0));
         }
 
     public void handleInput() {
         //Intake
-        //Fix/Clean up Intake
         if (inputManager.driverA && !driverAhold && intakeState == IntakeState.Off) {
             intakeState = IntakeState.On;
             driverAhold = true;
@@ -201,8 +203,13 @@ public class Shooter implements Updateable {
         //Manual Index
         if (inputManager.opY) {
             setIsIndexerOn(true, false);
+            centered = false;
         } else if (inputManager.opB) {
             setIsIndexerOn(true, true);
+            centered = false;
+        } else if (!centered) {
+            setIsIndexerOn(false, false);
+            centerIndexer();
         } else {
             setIsIndexerOn(false, false);
         }
@@ -260,14 +267,12 @@ public class Shooter implements Updateable {
     }
 
     public void index() {
-        double motorSpeed = 0.3;
-            if (isAdvancing && !isAdvancingRev) {
-                System.out.println("Running indexer fowards");
-                indexer.set(ControlMode.PercentOutput, -motorSpeed);
-            //isAdvancing = hasAdvanced();
-            } else if (!isAdvancing && isAdvancingRev) {
-                System.out.println("Running indexer reverse");
-                indexer.set(ControlMode.PercentOutput, motorSpeed);
+            if (isAdvancing && !isAdvancingRev && !centering) {
+                indexer.set(ControlMode.PercentOutput, -0.22);
+            } else if (!isAdvancing && isAdvancingRev && !centering) {
+                indexer.set(ControlMode.PercentOutput, 0.22);
+            } else if (centering) {
+                indexer.set(ControlMode.PercentOutput, -0.22);
             } else {
                 indexer.set(ControlMode.PercentOutput, 0.0);
             }            
@@ -369,7 +374,7 @@ public class Shooter implements Updateable {
                     uptake.set(ControlMode.PercentOutput, 0.0);
                     break;
                 } else if (isShooterOn) {
-                    if(!indexerRotationLimit.get()) {
+                    if(hasAdvanced()) {
                         uptake.set(ControlMode.PercentOutput, 1.0);
                     } else {
                         uptake.set(ControlMode.PercentOutput, 0.0);
@@ -389,7 +394,7 @@ public class Shooter implements Updateable {
                 break;
             case FlywheelOn:
                 //Not using Constants.kFlywheelSpeed because PIDF loop NEEDS tuning, DO NOT CHANGE
-                setFlywheel(27000);
+                setFlywheel(20000);
                 if (isShooterOn && isFlywheelUpToSpeed(Constants.kFlywheelSpeed, inputManager.opStart)) {
                     shooterState = ShooterState.ShootBall;
                 } else if (!isShooterOn) {
@@ -742,23 +747,20 @@ public class Shooter implements Updateable {
     }
 
     private void centerIndexer() {
-        System.out.println("In center indexer");
+
         if (hasAdvanced()) {
-            System.out.println("In hasAdvanced = true block");
             centering = false;
-            setIsIndexerOn(false, false);
+            centered = true;
         } else if (!hasAdvanced()) {
-            System.out.println("In hasAdvanced = false block");
             centering = true;
-            setIsIndexerOn(true, false);
         }
     }
 
-    public void setIsIndexerOn(boolean isOn, boolean isRev) {
-        if (isRev) {
+    public void setIsIndexerOn(boolean isOn, boolean isReverse) {
+        if (isReverse) {
             isAdvancingRev = isOn;
             isAdvancing = false;
-        } else if (!isRev) {
+        } else if (!isReverse) {
             isAdvancing = isOn;
             isAdvancingRev = false;
         } else {

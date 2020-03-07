@@ -97,7 +97,9 @@ public class RobotMap {
         hood.config_kI(0, Constants.kHoodI, kTimeoutMs);
         hood.config_kD(0, Constants.kHoodD, kTimeoutMs);
 
+        indexer.configFactoryDefault(kTimeoutMs);
         indexer.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);
+        indexer.setNeutralMode(NeutralMode.Brake);
 
         turret.configFactoryDefault(kTimeoutMs);
         turret.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, kTimeoutMs);

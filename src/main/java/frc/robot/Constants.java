@@ -6,7 +6,7 @@ public class Constants {
     public static final double kFlywheelP = 0.01;
     public static final double kFlywheelI = 0.0;
     public static final double kFlywheelD = 0.1;
-    public static final int kFlywheelSpeed = 28000;
+    public static final int kFlywheelSpeed = 21000;
 
 
     public static final int kHoodMinimumHeight = 0;

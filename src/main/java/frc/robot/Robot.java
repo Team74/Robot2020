@@ -18,8 +18,7 @@ import frc.robot.Shooter.HoodState;
 import frc.robot.Shooter.LimelightLEDState;
 import frc.robot.Shooter.TurretState;
 import frc.robot.autonomous.AutonRunner;
-import frc.robot.autonomous.modes.GetOffLineMode;
-import frc.robot.autonomous.modes.ShootInitalBalls;
+import frc.robot.autonomous.modes.*;
 import frc.robot.autonomous.modes.TestAuton;
 
 /**
