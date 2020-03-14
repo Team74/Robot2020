@@ -8,11 +8,11 @@ import frc.robot.Shooter.TurretState;
 
 public class ScoreBallsAction implements Action {
 
-    public final double startTime;
-    public final double maxRunTime;
-    public final int numberBalls;
+    private final double startTime;
+    private final double maxRunTime;
+    private final int numberBalls;
 
-    public final Shooter shooter;
+    private final Shooter shooter;
 
     public ScoreBallsAction(double maxRunTime, int numberBalls) {
         shooter = Shooter.getInstance();

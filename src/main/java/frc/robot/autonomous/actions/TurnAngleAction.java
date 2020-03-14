@@ -6,11 +6,11 @@ import frc.robot.Drivebase.DriveState;
 
 public class TurnAngleAction implements Action {
     
-    public final Drivebase driveBase;
+    private final Drivebase driveBase;
 
-    public final double startTime;
-    public final double maxRunTime;
-    public final double turnAngleDeg;
+    private final double startTime;
+    private final double maxRunTime;
+    private final double turnAngleDeg;
 
     public TurnAngleAction(double maxRunTime, double turnAngleDeg) {
         driveBase = Drivebase.getInstance();

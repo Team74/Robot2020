@@ -6,11 +6,11 @@ import frc.robot.Drivebase.DriveState;
 
 public class DriveDistanceAction implements Action {
 
-    public final double startTime;
-    public final double maxRunTime;
-    public final double targetDistanceIn;
+    private final double startTime;
+    private final double maxRunTime;
+    private final double targetDistanceIn;
 
-    public final Drivebase driveBase;
+    private final Drivebase driveBase;
 
     public DriveDistanceAction(double maxRunTime, double targetDistanceIn) {
         driveBase = Drivebase.getInstance();
