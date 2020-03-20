@@ -26,11 +26,11 @@ public class Intake implements Updateable {
         
     }
 
-    public void setState(IndexerState newState) {
+    public void setState(IntakeState newState) {
 
     }
 
-    public void setControlState(IndexerControlState newState) {
+    public void setControlState(IntakeControlState newState) {
         
     }
 
